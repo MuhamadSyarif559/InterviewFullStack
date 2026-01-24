@@ -25,6 +25,8 @@ export class Register {
     private router: Router
   ) {
     this.form = this.fb.group({
+      name: ['', [Validators.required]],
+      companyname: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmpassword: ['', [Validators.required, Validators.minLength(6)]],
@@ -44,9 +46,9 @@ export class Register {
       return;
     }
     if (this.form.get('password')?.value === this.form.get('confirmpassword')?.value) {
-      const { email, password } = this.form.value;
+      const { name,companyname,email, password } = this.form.value;
 
-      this.auth.register(email!, password!).subscribe({
+      this.auth.register(name,companyname,email!, password!).subscribe({
         next: (res) => {
           const normalized = (res ?? '').toString().trim().replace(/^"|"$/g, '');
           this.msg = normalized;
@@ -58,7 +60,7 @@ export class Register {
         },
         error: (err) => {
           this.msg = err?.error ?? 'Register failed';
-          this.toast.show('Register failed.', 'error');
+          this.toast.show('Unable to register Email ALready exist.', 'error');
         }
       });
     } else {

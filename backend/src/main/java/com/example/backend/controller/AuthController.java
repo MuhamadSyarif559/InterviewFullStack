@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.RegisterRequest;
+import com.example.backend.dto.Session;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
@@ -41,8 +42,14 @@ public class AuthController {
 
         User u = new User();
         u.setEmail(req.email);
-        u.setPassword(encoder.encode(req.password)); // HASH
-        userRepository.save(u); // INSERT into users table
+        u.setPassword(encoder.encode(req.password)); 
+        u.setName(req.name);
+        u.setcompanyName(req.companyName);
+        u.setEmployementStatus(req.EmploymentStatus);
+        u.setIsDeleted(req.IsDeleted);
+
+
+        userRepository.save(u); 
 
         return ResponseEntity.ok("Registered");
     }
@@ -61,17 +68,24 @@ public class AuthController {
 
         session.setAttribute("userId", existing.get().getId());
         session.setAttribute("email", existing.get().getEmail());
-
+        session.setAttribute("name", existing.get().getName());
+        session.setAttribute("companyName", existing.get().getcompanyName());
         return ResponseEntity.ok("Login success");
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpSession session) {
-        Object email = session.getAttribute("email");
-        if (email == null) {
-            return ResponseEntity.status(401).body("Not logged in");
-        }
-        return ResponseEntity.ok(email.toString());
+    String email = (String) session.getAttribute("email");
+    String name = (String) session.getAttribute("name");
+    String companyName = (String) session.getAttribute("companyName");
+
+    if (email == null) {
+        return ResponseEntity.status(401).body("Not logged in");
+    }
+
+    Session response =new Session(email, name, companyName);
+
+    return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")

@@ -19,6 +19,21 @@ public class User {
 
     @Column(nullable=false)
     private String password;
+    
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String companyName;
+
+    @Column(nullable=true)
+    private int EmploymentStatus;
+
+    @Column(nullable= false)
+    private boolean IsDeleted;
+
+    @Column(nullable=true)
+    private Long tenantID;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -28,4 +43,20 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getName() {return name;}
+    public void setName(String name) {this.name =name;} 
+
+    public String getcompanyName() {return companyName;}
+    public void setcompanyName(String companyName) {this.companyName =companyName;} 
+
+    public int getEmployementStatus() {return EmploymentStatus;}
+    public void setEmployementStatus(int  EmploymentStatus) {this.EmploymentStatus=EmploymentStatus;}
+
+    public boolean getIsDeleted() {return IsDeleted;}
+    public void setIsDeleted(boolean  IsDeleted) {this.IsDeleted=IsDeleted;}
+
+    public Long gettenantID() {return tenantID;}
+    public void settenantID(Long  tenantID) {this.tenantID=tenantID;}
+
 }

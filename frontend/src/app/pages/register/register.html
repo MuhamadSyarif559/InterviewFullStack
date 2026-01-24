@@ -34,6 +34,17 @@
       </header>
 
       <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+
+        <label class="field">
+          <span>Name</span>
+          <input formControlName="name" />
+        </label>
+
+        <label class="field">
+          <span>Commpany Name</span>
+          <input formControlName="companyname" />
+        </label>
+
         <label class="field">
           <span>Email address</span>
           <input placeholder="you@warehouse.com" type="email" formControlName="email" />
@@ -45,13 +56,11 @@
 
         <label class="field">
           <span>Confirm Password</span>
-          <input
-            placeholder="Minimum 6 characters"
-            type="password"
-            formControlName="confirmpassword"
-            [class.is-error]="form.get('confirmpassword')?.errors?.['mismatch']"
-          />
+          <input placeholder="Minimum 6 characters" type="password" formControlName="confirmpassword"
+            [class.is-error]="form.get('confirmpassword')?.errors?.['mismatch']" />
         </label>
+
+  
         <button class="primary-btn" type="submit">Create account</button>
       </form>
 

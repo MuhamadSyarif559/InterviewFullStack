@@ -1,15 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+
+interface MeResponse {
+  id: string;
+  email: string;
+  name: string;
+  companyName: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class Auth {
   private baseUrl = 'http://localhost:8080/api/auth';
 
   constructor(private http: HttpClient) { }
 
-  register(email: string, password: string) {
+  register(name:string,companyName:string,email: string, password: string) {
     return this.http.post(
       `${this.baseUrl}/register`,
-      { email, password },
+      { email, password,name, companyName},
       { responseType: 'text', withCredentials: true }
     );
   }
@@ -23,9 +31,11 @@ export class Auth {
   }
 
   me() {
-    return this.http.get(`${this.baseUrl}/me`, { responseType: 'text', withCredentials: true });
-  }
-
+  return this.http.get<MeResponse>(
+    `${this.baseUrl}/me`,
+    { withCredentials: true }
+  );
+}
   logout() {
     return this.http.post(`${this.baseUrl}/logout`, {}, { responseType: 'text', withCredentials: true });
   }

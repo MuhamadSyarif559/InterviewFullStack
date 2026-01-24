@@ -7,5 +7,5 @@ import com.example.backend.entity.User;
 
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email); // JPA generates the query for you
+    Optional<User> findByEmail(String email); 
 }

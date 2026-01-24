@@ -1,14 +1,101 @@
 <div class="main-page">
-  <header class="main-header">
-    <div>
-      <p class="eyebrow">Inventory Dashboard</p>
-      <h1>Main Page</h1>
-      <p class="sub">This space is ready for your inventory modules.</p>
-    </div>
-    <button class="ghost-btn" (click)="logout()">Log out</button>
-  </header>
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <!-- <div class="sidebar-brand">
+      <span class="brand-mark">SP</span>
+      <div>
+        <p class="brand-label">StockPilot</p>
+        <p class="brand-sub">Operations Hub</p>
+      </div>
+    </div> -->
 
-  <section class="empty-card">
-    <p>Welcome. Add your widgets, tables, and reports here.</p>
-  </section>
+    <nav class="sidebar-nav">
+      <p class="nav-title">Navigation</p>
+      <button
+        class="nav-item"
+        type="button"
+        (click)="openTab('employee', 'Employee management')"
+        [class.active]="tabs.activeId() === 'employee'"
+      >
+        Employee management
+      </button>
+      <button
+        class="nav-item"
+        type="button"
+        (click)="openTab('stock-details', 'Stock details')"
+        [class.active]="tabs.activeId() === 'stock-details'"
+      >
+        Stock details
+      </button>
+      <button
+        class="nav-item"
+        type="button"
+        (click)="openTab('stock-in', 'Stock in')"
+        [class.active]="tabs.activeId() === 'stock-in'"
+      >
+        Stock in
+      </button>
+      <button
+        class="nav-item"
+        type="button"
+        (click)="openTab('stock-out', 'Stock out')"
+        [class.active]="tabs.activeId() === 'stock-out'"
+      >
+        Stock out
+      </button>
+      <button
+        class="nav-item"
+        type="button"
+        (click)="openTab('branch', 'Branch details')"
+        [class.active]="tabs.activeId() === 'branch'"
+      >
+        Branch details
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="ghost-btn" (click)="logout()">Log out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="main-header">
+      <button class="menu-btn" type="button" (click)="toggleSidebar()">
+        Menu
+      </button>
+      <div>
+        <p class="eyebrow">Inventory Dashboard</p>
+        <h1>{{CompanyName}}</h1>
+        <p class="sub">Welcome {{Username}}</p>
+      </div>
+    </header>
+
+    <div class="tab-bar" *ngIf="tabs.tabs().length > 0">
+      <button
+        class="tab"
+        type="button"
+        *ngFor="let tab of tabs.tabs()"
+        [class.active]="tab.id === tabs.activeId()"
+        (click)="tabs.select(tab.id)"
+      >
+        <span>{{ tab.title }}</span>
+        <span class="tab-close" (click)="closeTab($event, tab.id)">x</span>
+      </button>
+    </div>
+
+    <section class="tab-content" *ngIf="tabs.activeId(); else emptyState">
+      <app-employee-management *ngIf="tabs.activeId() === 'employee'" />
+      <app-stock-details *ngIf="tabs.activeId() === 'stock-details'" />
+      <app-stock-in *ngIf="tabs.activeId() === 'stock-in'" />
+      <app-stock-out *ngIf="tabs.activeId() === 'stock-out'" />
+      <app-branch-details *ngIf="tabs.activeId() === 'branch'" />
+    </section>
+
+    <ng-template #emptyState>
+      <section class="empty-card">
+        <p>Select a module from the sidebar to open it in a tab.</p>
+      </section>
+    </ng-template>
+  </main>
 </div>
+
+<div class="sidebar-overlay" [class.show]="sidebarOpen" (click)="closeSidebar()"></div>
