@@ -1,9 +1,54 @@
-<h2>Login</h2>
+<div class="auth-page">
+  <div class="auth-shell">
+    <section class="brand-panel">
+      <div class="brand-badge">StockPilot</div>
+      <h1>Inventory Command Center</h1>
+      <p class="brand-copy">
+        Keep shelves balanced, reduce waste, and track every unit from dock to dispatch.
+        Centralize your inventory operations in one place.
+      </p>
+      <ul class="feature-list">
+        <li><span class="dot"></span> Live stock visibility across locations</li>
+        <li><span class="dot"></span> Fast receiving + cycle counts</li>
+        <li><span class="dot"></span> Purchase and sales readiness alerts</li>
+      </ul>
+      <div class="status-card">
+        <div>
+          <p class="metric-label">System health</p>
+          <p class="metric-value">99.9% sync uptime</p>
+        </div>
+        <div>
+          <p class="metric-label">Daily updates</p>
+          <p class="metric-value">2,480+ SKU changes</p>
+        </div>
+      </div>
+    </section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <input placeholder="Email" formControlName="email" />
-  <input placeholder="Password" type="password" formControlName="password" />
-  <button type="submit">Login</button>
-</form>
+    <section class="form-panel">
+      <header class="form-header">
+        <p class="eyebrow">Welcome back</p>
+        <h2>Log in to your inventory workspace</h2>
+        <p class="sub">
+          New here? <a routerLink="/register">Create an account</a> to start tracking stock.
+        </p>
+      </header>
 
-<p>{{ msg }}</p>
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="field">
+          <span>Email address</span>
+          <input placeholder="you@warehouse.com" type="email" formControlName="email" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input placeholder="••••••••" type="password" formControlName="password" />
+        </label>
+        <button class="primary-btn" type="submit">Log in</button>
+      </form>
+
+      <p class="form-msg" [class.is-error]="isError" [class.hidden]="!msg">{{ msg }}</p>
+      <p class="assist">
+        Can't access your account? <a routerLink="/register">Register here</a> to create a new one.
+      </p>
+    </section>
+  </div>
+</div>

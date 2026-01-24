@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -46,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req, HttpSession session) {
         Optional<User> existing = userRepository.findByEmail(req.email);
         if (existing.isEmpty()) {
             return ResponseEntity.status(401).body("Invalid credentials");
@@ -57,6 +59,24 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
+        session.setAttribute("userId", existing.get().getId());
+        session.setAttribute("email", existing.get().getEmail());
+
         return ResponseEntity.ok("Login success");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(HttpSession session) {
+        Object email = session.getAttribute("email");
+        if (email == null) {
+            return ResponseEntity.status(401).body("Not logged in");
+        }
+        return ResponseEntity.ok(email.toString());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session) {
+        session.invalidate();
+        return ResponseEntity.ok("Logged out");
     }
 }

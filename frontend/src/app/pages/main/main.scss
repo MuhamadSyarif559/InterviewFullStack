@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: 'Source Sans 3', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at top left, #e2f0ff 0%, transparent 55%),
+    linear-gradient(140deg, #f7f9fb 0%, #eef2f7 45%, #f9f4ee 100%);
+  color: #122236;
+}
+
+.main-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+}
+
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.08);
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff8a3d;
+  font-weight: 700;
+}
+
+.main-header h1 {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.sub {
+  margin: 0;
+  color: #4b5a6b;
+}
+
+.ghost-btn {
+  border: 1px solid rgba(16, 38, 63, 0.2);
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: #ffffff;
+  color: #0b3858;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ghost-btn:hover {
+  border-color: #ff8a3d;
+  box-shadow: 0 10px 24px rgba(255, 138, 61, 0.18);
+}
+
+.empty-card {
+  border-radius: 18px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px dashed rgba(16, 38, 63, 0.18);
+  color: #5b6b7c;
+}
+
+@media (max-width: 720px) {
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

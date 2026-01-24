@@ -1,9 +1,64 @@
-<h2>Register</h2>
+<div class="auth-page">
+  <div class="auth-shell">
+    <section class="brand-panel">
+      <div class="brand-badge">StockPilot</div>
+      <h1>Launch your inventory hub</h1>
+      <p class="brand-copy">
+        Create an account to orchestrate stock moves, vendor orders, and alerts that
+        keep your inventory lean and accurate.
+      </p>
+      <ul class="feature-list">
+        <li><span class="dot"></span> Guided setup for SKUs and locations</li>
+        <li><span class="dot"></span> Smart reorder thresholds</li>
+        <li><span class="dot"></span> Role-based access for teams</li>
+      </ul>
+      <div class="status-card">
+        <div>
+          <p class="metric-label">Launch time</p>
+          <p class="metric-value">Under 5 minutes</p>
+        </div>
+        <div>
+          <p class="metric-label">Inventory accuracy</p>
+          <p class="metric-value">Up to 98%</p>
+        </div>
+      </div>
+    </section>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <input placeholder="Email" formControlName="email" />
-  <input placeholder="Password" type="password" formControlName="password" />
-  <button type="submit">Register</button>
-</form>
+    <section class="form-panel">
+      <header class="form-header">
+        <p class="eyebrow">Get started</p>
+        <h2>Create your inventory account</h2>
+        <p class="sub">
+          Already have access? <a routerLink="/login">Log in instead</a>.
+        </p>
+      </header>
 
-<p>{{ msg }}</p>
+      <form class="auth-form" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="field">
+          <span>Email address</span>
+          <input placeholder="you@warehouse.com" type="email" formControlName="email" />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input placeholder="Minimum 6 characters" type="password" formControlName="password" />
+        </label>
+
+        <label class="field">
+          <span>Confirm Password</span>
+          <input
+            placeholder="Minimum 6 characters"
+            type="password"
+            formControlName="confirmpassword"
+            [class.is-error]="form.get('confirmpassword')?.errors?.['mismatch']"
+          />
+        </label>
+        <button class="primary-btn" type="submit">Create account</button>
+      </form>
+
+      <p class="form-msg" [class.is-error]="isError" [class.hidden]="!msg">{{ msg }}</p>
+      <p class="assist">
+        By registering, you can keep purchase orders and stock counts aligned.
+      </p>
+    </section>
+  </div>
+</div>
