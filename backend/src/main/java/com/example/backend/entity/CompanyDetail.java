@@ -17,10 +17,10 @@ public class CompanyDetail {
     @Column(nullable = false)
     private String companyName;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String address;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String PhoneNumbeString;
 
     public Long getId() { return id; }

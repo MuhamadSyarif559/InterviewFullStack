@@ -1,0 +1,69 @@
+<div class="form-header">
+  <div>
+    <p class="eyebrow">User record</p>
+    <h3>{{ mode === 'add' ? 'Add user' : 'Edit user' }}</h3>
+    <p class="sub">Manage user profile details stored in the users table.</p>
+  </div>
+  <button class="ghost-btn" type="button" (click)="cancel.emit()">Close</button>
+</div>
+
+<form class="form-body" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="form-grid">
+
+    <div class="field">
+      <label for="user-name">Full name</label>
+      <input id="user-name" type="text" formControlName="name" placeholder="Jane Doe" />
+      <span class="error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">
+        Name is required.
+      </span>
+    </div>
+
+    <div class="field">
+      <label for="user-email">Email</label>
+      <input id="user-email" type="email" formControlName="email" placeholder="jane@stockpilot.com" />
+      <span class="error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+        Enter a valid email.
+      </span>
+    </div>
+
+
+
+    <div class="field">
+      <label for="employment-status">Employment status</label>
+      <select id="employment-status" formControlName="employmentStatus">
+        <option [ngValue]="0">Admin</option>
+        <option [ngValue]="1">Staff</option>
+      </select>
+    </div>
+
+
+    <div class="field">
+      <label for="user-password">Password</label>
+      <input
+        id="user-password"
+        type="password"
+        formControlName="password"
+        [placeholder]="mode === 'add' ? 'Create a password' : 'Leave blank to keep current'"
+      />
+      <span class="error" *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+        Password must be at least 6 characters.
+      </span>
+      <span class="helper" *ngIf="mode === 'edit'">Leave blank to keep the current password.</span>
+    </div>
+
+    <div class="field checkbox-field">
+      <label for="is-deleted">Marked deleted</label>
+      <div class="checkbox-row">
+        <input id="is-deleted" type="checkbox" formControlName="isDeleted" />
+        <span class="helper">Flag the user record as deleted.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="ghost-btn" type="button" (click)="cancel.emit()">Cancel</button>
+    <button class="primary-btn" type="submit">
+      {{ mode === 'add' ? 'Add user' : 'Save changes' }}
+    </button>
+  </div>
+</form>

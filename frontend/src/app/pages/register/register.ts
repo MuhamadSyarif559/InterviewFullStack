@@ -46,22 +46,36 @@ export class Register {
       return;
     }
     if (this.form.get('password')?.value === this.form.get('confirmpassword')?.value) {
-      const { name,companyname,email, password } = this.form.value;
+      const { name, companyname, email, password } = this.form.value;
 
-      this.auth.register(name,companyname,email!, password!).subscribe({
+      this.auth.Companyregister(companyname).subscribe({
         next: (res) => {
-          const normalized = (res ?? '').toString().trim().replace(/^"|"$/g, '');
-          this.msg = normalized;
+          if (res) {
+            const tenantid = parseInt(res.toString())
+            this.auth.register(name, companyname, email!, 0,password!,tenantid).subscribe({
+              next: (res) => {
+                const normalized = (res ?? '').toString().trim().replace(/^"|"$/g, '');
+                this.msg = normalized;
 
-          if (normalized.toLowerCase() === 'registered') {
-            this.toast.show('Registered successfully.', 'success');
-            setTimeout(() => this.router.navigateByUrl('/login'), 900);
+                if (normalized.toLowerCase() === 'registered') {
+                  this.toast.show('Registered successfully.', 'success');
+                  setTimeout(() => this.router.navigateByUrl('/login'), 900);
+                }
+              },
+              error: (err) => {
+                this.msg = err?.error ?? 'Register failed';
+                this.toast.show('Unable to register Email ALready exist.', 'error');
+              }
+
+            });
           }
+
         },
         error: (err) => {
           this.msg = err?.error ?? 'Register failed';
           this.toast.show('Unable to register Email ALready exist.', 'error');
         }
+
       });
     } else {
       this.form.get('confirmpassword')?.setErrors({ mismatch: true });

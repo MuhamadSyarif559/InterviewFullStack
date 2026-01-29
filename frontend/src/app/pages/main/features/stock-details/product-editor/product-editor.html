@@ -1,0 +1,153 @@
+<section class="product-editor">
+  <header class="editor-header">
+    <button class="ghost-btn" type="button" (click)="goBack()">Back to list</button>
+    <div>
+      <p class="eyebrow">Product profile</p>
+      <h2>{{ productMode === 'add' ? 'Create product' : 'Edit product' }}</h2>
+      <p class="sub">Upload an image and save details. SKUs appear below once the product is saved.</p>
+    </div>
+    <button class="primary-btn" type="button" (click)="saveProduct()" [disabled]="saving">
+      {{ saving ? 'Saving...' : (productMode === 'add' ? 'Create product' : 'Save changes') }}
+    </button>
+  </header>
+
+  <div class="editor-body">
+    <div class="state" *ngIf="loading">Loading product...</div>
+    <div class="state error" *ngIf="!loading && error">{{ error }}</div>
+
+    <form class="product-form" [formGroup]="productForm" (ngSubmit)="saveProduct()" *ngIf="!loading">
+      <div class="panel">
+        <h3>Product details</h3>
+        <div class="field">
+          <label for="product-name">Product name</label>
+          <input id="product-name" type="text" formControlName="productName" placeholder="Premium hoodie" />
+          <span class="error" *ngIf="productForm.get('productName')?.touched && productForm.get('productName')?.invalid">
+            Product name is required.
+          </span>
+        </div>
+        <div class="field">
+          <label for="product-description">Description</label>
+          <textarea
+            id="product-description"
+            rows="4"
+            formControlName="description"
+            placeholder="Describe material, fit, or highlights"
+          ></textarea>
+        </div>
+        <div class="field">
+          <label for="product-image-path">Image path</label>
+          <input id="product-image-path" type="text" formControlName="productImage" readonly />
+        </div>
+      </div>
+
+      <div class="panel image-panel">
+        <h3>Product image</h3>
+        <div class="image-uploader">
+          <div class="image-preview" [class.empty]="!imagePreviewUrl">
+            <img *ngIf="imagePreviewUrl" [src]="imagePreviewUrl" alt="Product image preview" />
+            <span *ngIf="!imagePreviewUrl">Upload to preview</span>
+          </div>
+          <div class="upload-controls">
+            <input type="file" accept="image/*" (change)="handleImageUpload($event)" />
+            <p class="hint">PNG or JPG. Uploading saves the file to the server immediately.</p>
+            <div class="upload-state" *ngIf="imageUploading">Uploading image...</div>
+            <div class="upload-state error" *ngIf="imageUploadError">{{ imageUploadError }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="ghost-btn" type="button" (click)="goBack()">Cancel</button>
+        <button class="primary-btn" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (productMode === 'add' ? 'Create product' : 'Save changes') }}
+        </button>
+      </div>
+
+      <div class="state error" *ngIf="saveError">{{ saveError }}</div>
+    </form>
+
+    <section class="sku-section">
+      <div class="sku-header">
+        <div>
+          <p class="eyebrow">Product SKUs</p>
+          <h3>{{ skuMode === 'add' ? 'Add SKU' : 'Edit SKU' }}</h3>
+          <p class="sub">Add multiple SKUs for sizes, colors, or packaging.</p>
+        </div>
+        <button class="ghost-btn" type="button" (click)="openAddSku()" [disabled]="!productId">New SKU</button>
+      </div>
+
+      <div class="state" *ngIf="!productId">Save the product to start adding SKUs.</div>
+
+      <div class="sku-body" *ngIf="productId">
+        <div class="sku-list">
+          <div class="state" *ngIf="skuLoading">Loading SKUs...</div>
+          <div class="state error" *ngIf="!skuLoading && skuError">{{ skuError }}</div>
+
+          <ul class="sku-listing" *ngIf="!skuLoading && skus.length">
+            <li class="sku-item" *ngFor="let sku of skus" (click)="openEditSku(sku)">
+              <div class="sku-thumb" [class.empty]="!sku.image">
+                <img *ngIf="sku.image" [src]="resolveImage(sku.image)" alt="{{ sku.skuCode }}" />
+                <span *ngIf="!sku.image">No image</span>
+              </div>
+              <div class="sku-info">
+                <h4>{{ sku.skuCode }}</h4>
+                <p>Colour: {{ sku.colour || '-' }}</p>
+                <p>Size: {{ sku.size || '-' }}</p>
+                <p>Qty: {{ sku.quantityAvailable }}</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="state" *ngIf="!skuLoading && !skus.length">No SKUs yet.</div>
+        </div>
+
+        <form class="sku-form" [formGroup]="skuForm" (ngSubmit)="saveSku()">
+          <div class="field">
+            <label for="sku-code">SKU code</label>
+            <input id="sku-code" type="text" formControlName="skuCode" placeholder="SKU-001" />
+            <span class="error" *ngIf="skuForm.get('skuCode')?.touched && skuForm.get('skuCode')?.invalid">
+              SKU code is required.
+            </span>
+          </div>
+          <div class="field">
+            <label for="sku-colour">Colour</label>
+            <input id="sku-colour" type="text" formControlName="colour" placeholder="Midnight" />
+          </div>
+          <div class="field">
+            <label for="sku-size">Size</label>
+            <input id="sku-size" type="text" formControlName="size" placeholder="M" />
+          </div>
+          <div class="field">
+            <label for="sku-qty">Quantity available</label>
+            <input id="sku-qty" type="number" min="0" formControlName="quantityAvailable" />
+          </div>
+          <div class="field">
+            <label for="sku-image">Image path</label>
+            <input id="sku-image" type="text" formControlName="image" readonly />
+          </div>
+          <div class="field image-upload-field">
+            <label>SKU image</label>
+            <div class="image-uploader">
+              <div class="image-preview" [class.empty]="!skuImagePreviewUrl">
+                <img *ngIf="skuImagePreviewUrl" [src]="skuImagePreviewUrl" alt="SKU image preview" />
+                <span *ngIf="!skuImagePreviewUrl">Upload to preview</span>
+              </div>
+              <div class="upload-controls">
+                <input type="file" accept="image/*" (change)="handleSkuImageUpload($event)" />
+                <p class="hint">PNG or JPG. Uploading saves the file to the server immediately.</p>
+                <div class="upload-state" *ngIf="skuImageUploading">Uploading image...</div>
+                <div class="upload-state error" *ngIf="skuImageUploadError">{{ skuImageUploadError }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="ghost-btn" type="button" (click)="resetSkuForm()">Clear</button>
+            <button class="primary-btn" type="submit">
+              {{ skuMode === 'add' ? 'Add SKU' : 'Save SKU' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</section>

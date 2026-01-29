@@ -1,16 +1,61 @@
-<section class="feature-card">
-  <div class="feature-header">
-    <h2>Employee management</h2>
-    <p>Manage staff records, roles, and access in one place.</p>
-  </div>
-  <div class="feature-body">
-    <div class="feature-tile">
-      <h3>Team overview</h3>
-      <p>Add employee lists, role assignments, and activity logs here.</p>
+<section class="employee-card">
+  <div class="employee-header">
+    <div>
+      <h2>User management</h2>
+      <p>Manage users stored in the backend users table.</p>
     </div>
-    <div class="feature-tile">
-      <h3>Quick actions</h3>
-      <p>Invite staff, reset access, and update permissions.</p>
+    <button class="primary-btn" type="button" (click)="openAdd()">Add user</button>
+  </div>
+
+  <div class="employee-body">
+    <div class="employee-table">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Employment status</th>
+            <th>Tenant</th>
+            <th>Deleted</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="employees$ | async as employees">
+          <tr *ngFor="let e of employees" (click)="openEdit(e)">
+
+            <td>
+              <div class="employee-name">
+                <span class="name">{{ e.name }}</span>
+                <span class="meta">ID: {{ e.id }}</span>
+              </div>
+            </td>
+            <td>{{ e.email }}</td>
+            <td>{{ e.companyName }}</td>
+            <td>{{ e.employmentStatus === 1 ? 'Staff' : 'Admin' }}</td>
+            <td>{{ e.tenantId ?? '—' }}</td>
+            <td>
+              <span class="status-pill" [class.inactive]="e.isDeleted">
+                {{ e.isDeleted ? 'Yes' : 'No' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="!employees.length">
+            <td colspan="6">No users found</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-state" *ngIf="loading">Loading users…</div>
+      <div class="table-state error" *ngIf="!loading && error">{{ error }}</div>
+    </div>
+
+    <div class="employee-panel">
+      <app-employee-form *ngIf="formOpen; else emptyPanel" [employee]="selectedEmployee" [mode]="formMode"
+        (save)="handleSave($event)" (cancel)="closeForm()"></app-employee-form>
+      <ng-template #emptyPanel>
+        <div class="empty-panel">
+          <p>Select an employee row to edit or create a new record.</p>
+        </div>
+      </ng-template>
     </div>
   </div>
 </section>

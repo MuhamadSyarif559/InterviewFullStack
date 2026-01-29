@@ -42,7 +42,9 @@
           <span>Password</span>
           <input placeholder="••••••••" type="password" formControlName="password" />
         </label>
-        <button class="primary-btn" type="submit">Log in</button>
+        <button class="primary-btn" type="submit" [disabled]="loading">
+          {{ loading ? 'Logging in...' : 'Log in' }}
+        </button>
       </form>
 
       <p class="form-msg" [class.is-error]="isError" [class.hidden]="!msg">{{ msg }}</p>

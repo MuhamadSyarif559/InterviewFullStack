@@ -1,19 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
-import { TabService } from '../../services/tab';
 import { EmployeeManagement } from './features/employee-management/employee-management';
 import { StockDetails } from './features/stock-details/stock-details';
 import { StockIn } from './features/stock-in/stock-in';
 import { StockOut } from './features/stock-out/stock-out';
 import { BranchDetails } from './features/branch-details/branch-details';
+import { SessionService } from '../../services/session';
 
 @Component({
   standalone: true,
   selector: 'app-main',
   imports: [
     CommonModule,
+    RouterModule,
     EmployeeManagement,
     StockDetails,
     StockIn,
@@ -27,6 +28,8 @@ export class Main implements OnInit {
   sidebarOpen = false;
   Username: string = '';
   CompanyName: string = '';
+  tenantid: number = 0;
+  sessionLoaded = false;
   navItems = [
     { id: 'employee', title: 'Employee management' },
     { id: 'stock-details', title: 'Stock details' },
@@ -38,37 +41,32 @@ export class Main implements OnInit {
   constructor(
     private auth: Auth,
     private router: Router,
-    public tabs: TabService
+    private session: SessionService
   ) {}
 
   ngOnInit() {
-    this.auth.me().subscribe({
-      next: (response) => {
-        const data = typeof response === 'string' ? JSON.parse(response) : response;
-        this.CompanyName = data?.companyName ?? '';
-        this.Username = data?.name ?? '';
-        console.log('works', data);
-        console.log('company name', this.CompanyName);
-      },
-      error: () => this.router.navigateByUrl('/login')
-    });
+    const data = this.session.value;
+    if (!data) {
+      this.router.navigateByUrl('/login');
+      return;
+    }
+    this.CompanyName = data.companyName ?? '';
+    this.Username = data.name ?? '';
+    this.tenantid = data.tenantID ?? 0;
+    this.sessionLoaded = true;
   }
 
   logout() {
     this.auth.logout().subscribe({
-      next: () => this.router.navigateByUrl('/login'),
-      error: () => this.router.navigateByUrl('/login')
+      next: () => {
+        this.session.clear();
+        this.router.navigateByUrl('/login');
+      },
+      error: () => {
+        this.session.clear();
+        this.router.navigateByUrl('/login');
+      }
     });
-  }
-
-  openTab(id: string, title: string) {
-    this.tabs.open(id, title);
-    this.sidebarOpen = false;
-  }
-
-  closeTab(event: MouseEvent, id: string) {
-    event.stopPropagation();
-    this.tabs.close(id);
   }
 
   toggleSidebar() {
@@ -78,4 +76,5 @@ export class Main implements OnInit {
   closeSidebar() {
     this.sidebarOpen = false;
   }
+
 }

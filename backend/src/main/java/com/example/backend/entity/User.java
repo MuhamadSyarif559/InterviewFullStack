@@ -8,8 +8,9 @@ import jakarta.persistence.Table;
 
 
 @Entity
-@Table(name = "users") // avoid reserved word "user"
+@Table(name = "users")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,20 +20,20 @@ public class User {
 
     @Column(nullable=false)
     private String password;
-    
+
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
     private String companyName;
 
-    @Column(nullable=true)
-    private int EmploymentStatus;
+    @Column(nullable = true)
+    private int employmentStatus;
 
-    @Column(nullable= false)
-    private boolean IsDeleted;
+    @Column(nullable = false)
+    private boolean isDeleted;
 
-    @Column(nullable=true)
+    @Column(nullable = true)
     private Long tenantID;
 
     public Long getId() { return id; }
@@ -44,19 +45,18 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getName() {return name;}
-    public void setName(String name) {this.name =name;} 
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getcompanyName() {return companyName;}
-    public void setcompanyName(String companyName) {this.companyName =companyName;} 
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-    public int getEmployementStatus() {return EmploymentStatus;}
-    public void setEmployementStatus(int  EmploymentStatus) {this.EmploymentStatus=EmploymentStatus;}
+    public int getEmploymentStatus() { return employmentStatus; }
+    public void setEmploymentStatus(int employmentStatus) { this.employmentStatus = employmentStatus; }
 
-    public boolean getIsDeleted() {return IsDeleted;}
-    public void setIsDeleted(boolean  IsDeleted) {this.IsDeleted=IsDeleted;}
+    public boolean isDeleted() { return isDeleted; }
+    public void setDeleted(boolean deleted) { isDeleted = deleted; }
 
-    public Long gettenantID() {return tenantID;}
-    public void settenantID(Long  tenantID) {this.tenantID=tenantID;}
-
+    public Long getTenantID() { return tenantID; }
+    public void setTenantID(Long tenantID) { this.tenantID = tenantID; }
 }

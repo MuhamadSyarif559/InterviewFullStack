@@ -13,40 +13,50 @@
       <button
         class="nav-item"
         type="button"
-        (click)="openTab('employee', 'Employee management')"
-        [class.active]="tabs.activeId() === 'employee'"
+        routerLink="/main/employee"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         Employee management
       </button>
       <button
         class="nav-item"
         type="button"
-        (click)="openTab('stock-details', 'Stock details')"
-        [class.active]="tabs.activeId() === 'stock-details'"
+        routerLink="/main/stock-details"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         Stock details
       </button>
       <button
         class="nav-item"
         type="button"
-        (click)="openTab('stock-in', 'Stock in')"
-        [class.active]="tabs.activeId() === 'stock-in'"
+        routerLink="/main/stock-in"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         Stock in
       </button>
       <button
         class="nav-item"
         type="button"
-        (click)="openTab('stock-out', 'Stock out')"
-        [class.active]="tabs.activeId() === 'stock-out'"
+        routerLink="/main/stock-out"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         Stock out
       </button>
       <button
         class="nav-item"
         type="button"
-        (click)="openTab('branch', 'Branch details')"
-        [class.active]="tabs.activeId() === 'branch'"
+        routerLink="/main/branch"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeSidebar()"
       >
         Branch details
       </button>
@@ -62,39 +72,25 @@
       <button class="menu-btn" type="button" (click)="toggleSidebar()">
         Menu
       </button>
-      <div>
-        <p class="eyebrow">Inventory Dashboard</p>
-        <h1>{{CompanyName}}</h1>
-        <p class="sub">Welcome {{Username}}</p>
-      </div>
+      <ng-container *ngIf="sessionLoaded; else headerLoading">
+        <div>
+          <p class="eyebrow">Inventory Dashboard</p>
+          <h1>{{ CompanyName }}</h1>
+          <p class="sub">Welcome {{ Username }}</p>
+        </div>
+      </ng-container>
+      <ng-template #headerLoading>
+        <div>
+          <p class="eyebrow">Inventory Dashboard</p>
+          <h1></h1>
+          <p class="sub"></p>
+        </div>
+      </ng-template>
     </header>
 
-    <div class="tab-bar" *ngIf="tabs.tabs().length > 0">
-      <button
-        class="tab"
-        type="button"
-        *ngFor="let tab of tabs.tabs()"
-        [class.active]="tab.id === tabs.activeId()"
-        (click)="tabs.select(tab.id)"
-      >
-        <span>{{ tab.title }}</span>
-        <span class="tab-close" (click)="closeTab($event, tab.id)">x</span>
-      </button>
-    </div>
-
-    <section class="tab-content" *ngIf="tabs.activeId(); else emptyState">
-      <app-employee-management *ngIf="tabs.activeId() === 'employee'" />
-      <app-stock-details *ngIf="tabs.activeId() === 'stock-details'" />
-      <app-stock-in *ngIf="tabs.activeId() === 'stock-in'" />
-      <app-stock-out *ngIf="tabs.activeId() === 'stock-out'" />
-      <app-branch-details *ngIf="tabs.activeId() === 'branch'" />
+    <section class="tab-content">
+      <router-outlet></router-outlet>
     </section>
-
-    <ng-template #emptyState>
-      <section class="empty-card">
-        <p>Select a module from the sidebar to open it in a tab.</p>
-      </section>
-    </ng-template>
   </main>
 </div>
 
