@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { catchError, finalize, of } from 'rxjs';
+import { catchError, filter, finalize, map, of, switchMap, take } from 'rxjs';
 import { StockInDialog } from './stock-in-dialog/stock-in-dialog';
 import { StockInService, StockIn as StockInRecord } from '../../../../services/stock-in';
 import { SessionService } from '../../../../services/session';
+import { Observable } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -13,7 +14,8 @@ import { SessionService } from '../../../../services/session';
   styleUrl: './stock-in.scss'
 })
 export class StockIn implements OnInit {
-  stockIns: StockInRecord[] = [];
+  stockIns$!: Observable<StockInRecord[]>;
+
   loading = false;
   error = '';
 
@@ -29,36 +31,56 @@ export class StockIn implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.tenantId = this.session.value?.tenantID ?? 0;
-    this.createdBy = this.session.value?.userId ?? 0;
+    const session = this.session.value;
 
-    this.loadStockIns();
+    if (session?.tenantID) {
+      this.tenantId = session.tenantID;
+      this.createdBy = session.userId;
+      this.loadStockIns();
+      return;
+    }
+
+    // wait for session to be ready
+    this.session.session$
+      .pipe(
+        filter(s => !!s?.tenantID),
+        take(1)
+      )
+      .subscribe(s => {
+        this.tenantId = s!.tenantID;
+        this.createdBy = s!.userId;
+        this.loadStockIns();
+      });
   }
 
-  loadStockIns(): void {
+  // =========================
+  // LOAD (ASYNC)
+  // =========================
+  private loadStockIns(): void {
     if (!this.tenantId) {
       this.error = 'No tenant found in session.';
+      this.stockIns$ = of([]);
       return;
     }
 
     this.loading = true;
     this.error = '';
 
-    this.stockInService.listByTenant(this.tenantId)
-      .pipe(
-        catchError((err) => {
-          this.error = err?.error ?? 'Unable to load stock in records';
-          return of([]);
-        }),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe((records: StockInRecord[]) => {
-        this.stockIns = records ?? [];
-      });
+    this.stockIns$ = this.stockInService.listByTenant(this.tenantId).pipe(
+      map(records => records ?? []),
+      catchError(err => {
+        this.error = err?.error ?? 'Unable to load stock in records';
+        return of([]);
+      }),
+      finalize(() => {
+        this.loading = false;
+      })
+    );
   }
 
+  // =========================
+  // UI ACTIONS
+  // =========================
   openCreate(): void {
     this.editingStockInId = null;
     this.editorOpen = true;
@@ -86,7 +108,7 @@ export class StockIn implements OnInit {
 
     this.stockInService.delete(record.id)
       .pipe(
-        catchError((err) => {
+        catchError(err => {
           this.error = err?.error ?? 'Unable to delete stock in';
           return of(null);
         }),

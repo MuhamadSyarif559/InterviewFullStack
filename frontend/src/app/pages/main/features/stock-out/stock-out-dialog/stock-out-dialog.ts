@@ -5,8 +5,8 @@ import { BehaviorSubject, catchError, combineLatest, concatMap, filter, finalize
 import { Product } from '../../stock-details/product.model';
 import { ProductSku } from '../../stock-details/product-sku.model';
 import { ProductService } from '../../../../../services/product';
-import { StockInService, StockIn as StockInRecord } from '../../../../../services/stock-in';
-import { StockInDetail, StockInDetailService } from '../../../../../services/stock-in-detail';
+import { StockOutService, StockOut as StockOutRecord } from '../../../../../services/stock-out';
+import { StockOutDetail, StockOutDetailService } from '../../../../../services/stock-out-detail';
 
 type DetailItem = {
   index: number;
@@ -18,21 +18,21 @@ type DetailItem = {
 
 @Component({
   standalone: true,
-  selector: 'app-stock-in-dialog',
+  selector: 'app-stock-out-dialog',
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './stock-in-dialog.html',
-  styleUrl: './stock-in-dialog.scss'
+  templateUrl: './stock-out-dialog.html',
+  styleUrl: './stock-out-dialog.scss'
 })
-export class StockInDialog implements OnInit, OnChanges {
+export class StockOutDialog implements OnInit, OnChanges {
   @Input() tenantId = 0;
   @Input() createdBy = 0;
-  @Input() stockInId: number | null = null;
+  @Input() stockOutId: number | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
   saving = false;
   saveError = '';
-  runningNumber = 'SI001';
+  runningNumber = 'SO001';
   isFinalized = false;
 
   productsVm$!: Observable<{ items: Product[]; loading: boolean; error: string }>;
@@ -40,15 +40,15 @@ export class StockInDialog implements OnInit, OnChanges {
   private skusByProduct$ = new Map<number, Observable<ProductSku[]>>();
   activeSearchIndex: number | null = null;
 
-  stockInForm: FormGroup;
-  stockIn$!: Observable<StockInRecord | null>;
+  stockOutForm: FormGroup;
+  stockOut$!: Observable<StockOutRecord | null>;
   constructor(
     private fb: FormBuilder,
-    private stockInService: StockInService,
-    private stockInDetailService: StockInDetailService,
+    private stockOutService: StockOutService,
+    private stockOutDetailService: StockOutDetailService,
     private productService: ProductService
   ) {
-    this.stockInForm = this.fb.group({
+    this.stockOutForm = this.fb.group({
       description: [''],
       date: [this.today(), Validators.required],
       details: this.fb.array([])
@@ -79,9 +79,8 @@ export class StockInDialog implements OnInit, OnChanges {
       shareReplay({ bufferSize: 1, refCount: true })
     );
 
-    if (this.stockInId) {
-      this.loadExisting(this.stockInId);
-      this.loadDetails(this.stockInId);
+    if (this.stockOutId) {
+      this.loadExisting(this.stockOutId);
     } else {
       this.resetForNew();
     }
@@ -91,16 +90,16 @@ export class StockInDialog implements OnInit, OnChanges {
     if (changes['tenantId'] && !changes['tenantId'].firstChange) {
       this.tenantIdSubject.next(this.tenantId);
     }
-    if (changes['stockInId'] && !changes['stockInId'].firstChange) {
-      if (this.stockInId) {
-        this.loadExisting(this.stockInId);
+    if (changes['stockOutId'] && !changes['stockOutId'].firstChange) {
+      if (this.stockOutId) {
+        this.loadExisting(this.stockOutId);
       } else {
         this.resetForNew();
       }
     }
   }
   get details(): FormArray {
-    return this.stockInForm.get('details') as FormArray;
+    return this.stockOutForm.get('details') as FormArray;
   }
 
   addDetail(): void {
@@ -119,11 +118,11 @@ export class StockInDialog implements OnInit, OnChanges {
     if (this.details.length <= 1) return;
     const group = this.details.at(index);
     const id = group?.get('id')?.value as number | null;
-    if (this.stockInId && id) {
-      this.stockInDetailService.delete(id)
+    if (this.stockOutId && id) {
+      this.stockOutDetailService.delete(id)
         .pipe(
           catchError((err) => {
-            this.saveError = err?.error ?? 'Unable to delete stock in detail';
+            this.saveError = err?.error ?? 'Unable to delete stock out detail';
             return of(null);
           })
         )
@@ -135,10 +134,10 @@ export class StockInDialog implements OnInit, OnChanges {
     this.details.removeAt(index);
   }
 
-  saveStockIn(): void {
+  saveStockOut(): void {
     if (this.isFinalized) return;
-    if (this.stockInForm.invalid) {
-      this.stockInForm.markAllAsTouched();
+    if (this.stockOutForm.invalid) {
+      this.stockOutForm.markAllAsTouched();
       return;
     }
     if (!this.tenantId) {
@@ -149,7 +148,7 @@ export class StockInDialog implements OnInit, OnChanges {
     this.saving = true;
     this.saveError = '';
 
-    const formValue = this.stockInForm.getRawValue();
+    const formValue = this.stockOutForm.getRawValue();
     const headerPayload = {
       description: formValue.description,
       date: this.toIsoDateTime(formValue.date),
@@ -157,14 +156,14 @@ export class StockInDialog implements OnInit, OnChanges {
       tenantId: this.tenantId
     };
 
-    const createOrUseHeader$ = this.stockInId
-      ? this.stockInService.update(this.stockInId, headerPayload)
-      : this.stockInService.create(headerPayload);
+    const createOrUseHeader$ = this.stockOutId
+      ? this.stockOutService.update(this.stockOutId, headerPayload)
+      : this.stockOutService.create(headerPayload);
 
     createOrUseHeader$
       .pipe(
-        concatMap((created: StockInRecord) => {
-          this.stockInId = created.id;
+        concatMap((created: StockOutRecord) => {
+          this.stockOutId = created.id;
           this.runningNumber = created.runningNumber || this.runningNumber;
 
           const items: DetailItem[] = (formValue.details ?? []).map((item: any, index: number) => ({
@@ -182,12 +181,12 @@ export class StockInDialog implements OnInit, OnChanges {
                   concatMap((list: DetailItem[]) => list),
                   concatMap((detail: DetailItem) =>
                     (detail.id
-                      ? this.stockInDetailService.update(detail.id, {
+                      ? this.stockOutDetailService.update(detail.id, {
                         productName: detail.productName,
                         sku: detail.sku,
                         quantity: detail.quantity
                       })
-                      : this.stockInDetailService.create(created.id, {
+                      : this.stockOutDetailService.create(created.id, {
                         productName: detail.productName,
                         sku: detail.sku,
                         quantity: detail.quantity
@@ -203,14 +202,14 @@ export class StockInDialog implements OnInit, OnChanges {
           );
         }),
         catchError((err) => {
-          this.saveError = err?.error ?? 'Unable to save stock in';
+          this.saveError = err?.error ?? 'Unable to save stock out';
           return of([]);
         }),
         finalize(() => {
           this.saving = false;
         })
       )
-      .subscribe((savedDetails: Array<{ index: number; savedDetail: StockInDetail }>) => {
+      .subscribe((savedDetails: Array<{ index: number; savedDetail: StockOutDetail }>) => {
         if (Array.isArray(savedDetails)) {
           savedDetails.forEach(({ index, savedDetail }) => {
             const group = this.details.at(index);
@@ -227,15 +226,15 @@ export class StockInDialog implements OnInit, OnChanges {
     this.closed.emit();
   }
 
-  finalizeStockIn(): void {
-    if (!this.stockInId || this.isFinalized) return;
+  finalizeStockOut(): void {
+    if (!this.stockOutId || this.isFinalized) return;
     this.saving = true;
     this.saveError = '';
 
-    this.stockInService.finalize(this.stockInId)
+    this.stockOutService.finalize(this.stockOutId)
       .pipe(
         catchError((err) => {
-          this.saveError = err?.error ?? 'Unable to finalize stock in';
+          this.saveError = err?.error ?? 'Unable to finalize stock out';
           return of(null);
         }),
         finalize(() => {
@@ -246,47 +245,46 @@ export class StockInDialog implements OnInit, OnChanges {
         if (!record) return;
         this.runningNumber = record.runningNumber || this.runningNumber;
         this.isFinalized = true;
-        this.stockInForm.disable({ emitEvent: false });
+        this.stockOutForm.disable({ emitEvent: false });
         this.saved.emit();
       });
   }
 
   loadNextNumber(): void {
     if (!this.tenantId) {
-      this.runningNumber = 'SI001';
+      this.runningNumber = 'SO001';
       return;
     }
-    this.stockInService.getNextNumber(this.tenantId)
+    this.stockOutService.getNextNumber(this.tenantId)
       .pipe(
-        catchError(() => of('SI001'))
+        catchError(() => of('SO001'))
       )
       .subscribe((num: string) => {
-        this.runningNumber = num || 'SI001';
+        this.runningNumber = num || 'SO001';
       });
   }
 
-  private loadExisting(stockInId: number): void {
+  private loadExisting(stockOutId: number): void {
     this.saveError = '';
 
-    this.stockIn$ = this.stockInService.getById(stockInId).pipe(
+    this.stockOut$ = this.stockOutService.getById(stockOutId).pipe(
       tap(record => {
         if (!record) return;
 
-        this.runningNumber = record.runningNumber || 'SI001';
+        this.runningNumber = record.runningNumber || 'SO001';
         this.isFinalized = !!record.finalized;
 
-        this.stockInForm.patchValue({
+        this.stockOutForm.patchValue({
           description: record.description ?? '',
           date: record.date ? record.date.slice(0, 10) : this.today()
         });
 
         if (this.isFinalized) {
-          this.stockInForm.disable({ emitEvent: false });
+          this.stockOutForm.disable({ emitEvent: false });
         } else {
-          this.stockInForm.enable({ emitEvent: false });
+          this.stockOutForm.enable({ emitEvent: false });
         }
       }),
-
 
       tap(record => {
         if (record?.id) {
@@ -295,7 +293,7 @@ export class StockInDialog implements OnInit, OnChanges {
       }),
 
       catchError(err => {
-        this.saveError = err?.error ?? 'Unable to load stock in';
+        this.saveError = err?.error ?? 'Unable to load stock out';
         return of(null);
       })
     );
@@ -303,10 +301,10 @@ export class StockInDialog implements OnInit, OnChanges {
 
   private resetForNew(): void {
     this.isFinalized = false;
-    this.runningNumber = 'SI001';
+    this.runningNumber = 'SO001';
     this.saveError = '';
-    this.stockInForm.enable({ emitEvent: false });
-    this.stockInForm.reset({
+    this.stockOutForm.enable({ emitEvent: false });
+    this.stockOutForm.reset({
       description: '',
       date: this.today()
     });
@@ -317,9 +315,9 @@ export class StockInDialog implements OnInit, OnChanges {
     this.loadNextNumber();
   }
 
-  private loadDetails(stockInId: number): void {
+  private loadDetails(stockOutId: number): void {
     combineLatest([
-      this.stockInDetailService.listByStockIn(stockInId).pipe(catchError(() => of([]))),
+      this.stockOutDetailService.listByStockOut(stockOutId).pipe(catchError(() => of([]))),
       this.productsVm$.pipe(
         filter((vm) => !vm.loading),
         map((vm) => vm.items)

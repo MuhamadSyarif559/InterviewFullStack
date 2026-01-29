@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-
+import { environment } from '../../enviroment/enviroment';
 interface MeResponse {
   userId: number;
   email: string;
@@ -11,7 +11,10 @@ interface MeResponse {
 
 @Injectable({ providedIn: 'root' })
 export class Auth {
-  private baseUrl = 'http://localhost:8080/api/auth';
+  // private baseUrl = 'http://localhost:8080/api/auth';
+
+  
+  private readonly baseUrl = `${environment.apiBaseUrl}/auth`;
 
   constructor(private http: HttpClient) {}
 

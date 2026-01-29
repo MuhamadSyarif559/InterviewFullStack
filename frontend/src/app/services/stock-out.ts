@@ -2,15 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../enviroment/enviroment';
 
-export interface StockInDetail {
+export interface StockOutDetail {
   id?: number;
   productName: string;
   sku?: string | null;
   quantity: number;
-  stockInId?: number | null;
+  stockOutId?: number | null;
 }
 
-export interface StockIn {
+export interface StockOut {
   id: number;
   runningNumber: string;
   description?: string | null;
@@ -18,24 +18,24 @@ export interface StockIn {
   createdBy?: number | null;
   tenantId: number;
   finalized?: boolean;
-  details?: StockInDetail[];
+  details?: StockOutDetail[];
 }
 
 @Injectable({ providedIn: 'root' })
-export class StockInService {
-  private baseUrl = `${environment.apiBaseUrl}/stock-in`;
+export class StockOutService {
+  private baseUrl = `${environment.apiBaseUrl}/stock-out`;
 
   constructor(private http: HttpClient) {}
 
   listByTenant(tenantId: number) {
-    return this.http.get<StockIn[]>(
+    return this.http.get<StockOut[]>(
       `${this.baseUrl}/tenant/${tenantId}`,
       { withCredentials: true }
     );
   }
 
   getById(id: number) {
-    return this.http.get<StockIn>(
+    return this.http.get<StockOut>(
       `${this.baseUrl}/${id}`,
       { withCredentials: true }
     );
@@ -47,7 +47,7 @@ export class StockInService {
     createdBy?: number;
     tenantId: number;
   }) {
-    return this.http.post<StockIn>(
+    return this.http.post<StockOut>(
       this.baseUrl,
       payload,
       { withCredentials: true }
@@ -59,7 +59,7 @@ export class StockInService {
     date?: string;
     createdBy?: number;
   }) {
-    return this.http.put<StockIn>(
+    return this.http.put<StockOut>(
       `${this.baseUrl}/${id}`,
       payload,
       { withCredentials: true }
@@ -74,7 +74,7 @@ export class StockInService {
   }
 
   finalize(id: number) {
-    return this.http.post<StockIn>(
+    return this.http.post<StockOut>(
       `${this.baseUrl}/${id}/finalize`,
       {},
       { withCredentials: true }

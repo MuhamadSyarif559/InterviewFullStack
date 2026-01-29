@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Product } from '../pages/main/features/stock-details/product.model';
 import { ProductSku } from '../pages/main/features/stock-details/product-sku.model';
+import { environment } from '../../enviroment/enviroment';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private baseUrl = 'http://localhost:8080/api/products';
-  private skuUrl = 'http://localhost:8080/api/product-skus';
+  private baseUrl = `${environment.apiBaseUrl}/products`;
+  private skuUrl = `${environment.apiBaseUrl}/product-skus`;
 
   constructor(private http: HttpClient) {}
 

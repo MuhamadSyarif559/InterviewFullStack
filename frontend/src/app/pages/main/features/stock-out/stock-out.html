@@ -1,16 +1,77 @@
-<section class="feature-card">
-  <div class="feature-header">
-    <h2>Stock out</h2>
-    <p>Monitor outbound orders and track shipments leaving the warehouse.</p>
-  </div>
-  <div class="feature-body">
-    <div class="feature-tile">
-      <h3>Outbound queue</h3>
-      <p>View pick lists and pending dispatch orders.</p>
+<section class="stock-out">
+  <header class="stock-out__header">
+    <div>
+      <p class="eyebrow">Stock out</p>
+      <h2>Issue inventory</h2>
+      <p class="sub">Create stock-out entries and track outgoing quantities.</p>
     </div>
-    <div class="feature-tile">
-      <h3>Dispatch log</h3>
-      <p>Confirm carriers, destinations, and quantities shipped.</p>
-    </div>
+    <button class="primary-btn" type="button" (click)="openCreate()">
+      New stock out
+    </button>
+  </header>
+
+  <div class="panel list-panel">
+    <h3>Recent stock out</h3>
+
+    <div class="state" *ngIf="loading">Loading records...</div>
+    <div class="state error" *ngIf="!loading && error">{{ error }}</div>
+
+    <ng-container *ngIf="stockOuts$ | async as stockOuts">
+
+      <div class="empty" *ngIf="!loading && !error && !stockOuts.length">
+        No stock out records yet.
+      </div>
+
+      <div class="table-wrap" *ngIf="stockOuts.length">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Running no</th>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let record of stockOuts"
+              (click)="openEdit(record)"
+            >
+              <td class="mono">{{ record.runningNumber }}</td>
+              <td>{{ record.date | date: 'mediumDate' }}</td>
+              <td>{{ record.description || 'No description' }}</td>
+              <td>{{ record.details?.length || 0 }}</td>
+              <td>
+                <span class="status" [class.final]="record.finalized">
+                  {{ record.finalized ? 'Finalized' : 'Draft' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button
+                  class="ghost-btn danger"
+                  type="button"
+                  [disabled]="record.finalized"
+                  (click)="deleteStockOut(record); $event.stopPropagation()"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </ng-container>
   </div>
 </section>
+
+<app-stock-out-dialog
+  *ngIf="editorOpen"
+  [tenantId]="tenantId"
+  [createdBy]="createdBy"
+  [stockOutId]="editingStockOutId"
+  (closed)="closeCreate()"
+  (saved)="handleSaved()"
+></app-stock-out-dialog>

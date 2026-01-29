@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../enviroment/enviroment';
 export interface UserApiResponse {
   id: number;
   email: string;
@@ -12,7 +13,7 @@ export interface UserApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
-  private baseUrl = 'http://localhost:8080/api/users';
+  private baseUrl = `${environment.apiBaseUrl}/users`;
 
   constructor(private http: HttpClient) {}
 

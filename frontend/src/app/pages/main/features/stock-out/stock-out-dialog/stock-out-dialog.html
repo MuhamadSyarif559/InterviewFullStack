@@ -3,23 +3,23 @@
 
   <div class="editor-dialog">
 
-    <ng-container *ngIf="stockIn$ | async as stockIn; else newMode">
+    <ng-container *ngIf="stockOut$ | async as stockOut; else newMode">
 
       <section class="panel form-panel">
         <header class="dialog-header">
           <div>
-            <p class="eyebrow">Stock in</p>
-            <h3>Edit stock in</h3>
+            <p class="eyebrow">Stock out</p>
+            <h3>Edit stock out</h3>
             <p class="sub">Add line items for products and quantities.</p>
 
             <p class="meta">
               Running number:
-              <strong>{{ stockIn.runningNumber || runningNumber || 'SI001' }}</strong>
+              <strong>{{ stockOut.runningNumber || runningNumber || 'SO001' }}</strong>
             </p>
 
             <p class="meta">
               Status:
-              <strong>{{ stockIn.finalized ? 'Finalized' : 'Draft' }}</strong>
+              <strong>{{ stockOut.finalized ? 'Finalized' : 'Draft' }}</strong>
             </p>
           </div>
 
@@ -29,8 +29,8 @@
             <button
               class="primary-btn"
               type="button"
-              *ngIf="!stockIn.finalized"
-              (click)="finalizeStockIn()"
+              *ngIf="!stockOut.finalized"
+              (click)="finalizeStockOut()"
               [disabled]="saving"
             >
               Finalize
@@ -38,7 +38,7 @@
           </div>
         </header>
 
-        <ng-container [ngTemplateOutlet]="formBody" [ngTemplateOutletContext]="{ finalized: stockIn.finalized }"></ng-container>
+        <ng-container [ngTemplateOutlet]="formBody" [ngTemplateOutletContext]="{ finalized: stockOut.finalized }"></ng-container>
       </section>
     </ng-container>
 
@@ -46,8 +46,8 @@
       <section class="panel form-panel">
         <header class="dialog-header">
           <div>
-            <p class="eyebrow">New stock in</p>
-            <h3>Create stock in</h3>
+            <p class="eyebrow">New stock out</p>
+            <h3>Create stock out</h3>
             <p class="sub">Add line items for products and quantities.</p>
             <p class="meta">Running number: <strong>{{ runningNumber }}</strong></p>
             <p class="meta">Status: <strong>Draft</strong></p>
@@ -68,7 +68,7 @@
   <!-- ========================= -->
   <!-- FORM -->
   <!-- ========================= -->
-  <form [formGroup]="stockInForm" (ngSubmit)="saveStockIn()">
+  <form [formGroup]="stockOutForm" (ngSubmit)="saveStockOut()">
 
     <div class="field">
       <label for="stock-date">Date</label>
@@ -209,7 +209,7 @@
         type="submit"
         [disabled]="saving || finalized"
       >
-        {{ saving ? 'Saving...' : 'Save stock in' }}
+        {{ saving ? 'Saving...' : 'Save stock out' }}
       </button>
     </div>
   </form>

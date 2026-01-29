@@ -2,34 +2,34 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../enviroment/enviroment';
 
-export interface StockInDetail {
+export interface StockOutDetail {
   id: number;
   productName: string;
   sku?: string | null;
   quantity: number;
-  stockInId?: number | null;
+  stockOutId?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
-export class StockInDetailService {
-  private baseUrl = `${environment.apiBaseUrl}/stock-in-details`;
+export class StockOutDetailService {
+  private baseUrl = `${environment.apiBaseUrl}/stock-out-details`;
 
   constructor(private http: HttpClient) {}
 
-  listByStockIn(stockInId: number) {
-    return this.http.get<StockInDetail[]>(
-      `${this.baseUrl}/stock-in/${stockInId}`,
+  listByStockOut(stockOutId: number) {
+    return this.http.get<StockOutDetail[]>(
+      `${this.baseUrl}/stock-out/${stockOutId}`,
       { withCredentials: true }
     );
   }
 
-  create(stockInId: number, payload: {
+  create(stockOutId: number, payload: {
     productName: string;
     sku?: string | null;
     quantity: number;
   }) {
-    return this.http.post<StockInDetail>(
-      `${this.baseUrl}/stock-in/${stockInId}`,
+    return this.http.post<StockOutDetail>(
+      `${this.baseUrl}/stock-out/${stockOutId}`,
       payload,
       { withCredentials: true }
     );
@@ -40,7 +40,7 @@ export class StockInDetailService {
     sku?: string | null;
     quantity: number;
   }) {
-    return this.http.put<StockInDetail>(
+    return this.http.put<StockOutDetail>(
       `${this.baseUrl}/${id}`,
       payload,
       { withCredentials: true }

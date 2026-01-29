@@ -12,43 +12,59 @@
 
   <div class="panel list-panel">
     <h3>Recent stock in</h3>
+
     <div class="state" *ngIf="loading">Loading records...</div>
     <div class="state error" *ngIf="!loading && error">{{ error }}</div>
 
-    <div class="empty" *ngIf="!loading && !error && !stockIns.length">
-      No stock in records yet.
-    </div>
+    <!-- ✅ ASYNC PIPE UNWRAP -->
+    <ng-container *ngIf="stockIns$ | async as stockIns">
 
-    <div class="table-wrap" *ngIf="stockIns.length">
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Running no</th>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Items</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let record of stockIns" (click)="openEdit(record)">
-            <td class="mono">{{ record.runningNumber }}</td>
-            <td>{{ record.date | date: 'mediumDate' }}</td>
-            <td>{{ record.description || 'No description' }}</td>
-            <td>{{ record.details?.length || 0 }}</td>
-            <td class="actions">
-              <button
-                class="ghost-btn danger"
-                type="button"
-                (click)="deleteStockIn(record); $event.stopPropagation()"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="empty" *ngIf="!loading && !error && !stockIns.length">
+        No stock in records yet.
+      </div>
+
+      <div class="table-wrap" *ngIf="stockIns.length">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Running no</th>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let record of stockIns"
+              (click)="openEdit(record)"
+            >
+              <td class="mono">{{ record.runningNumber }}</td>
+              <td>{{ record.date | date: 'mediumDate' }}</td>
+              <td>{{ record.description || 'No description' }}</td>
+              <td>{{ record.details?.length || 0 }}</td>
+              <td>
+                <span class="status" [class.final]="record.finalized">
+                  {{ record.finalized ? 'Finalized' : 'Draft' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button
+                  class="ghost-btn danger"
+                  type="button"
+                  [disabled]="record.finalized"
+                  (click)="deleteStockIn(record); $event.stopPropagation()"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </ng-container>
   </div>
 </section>
 

@@ -15,72 +15,72 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.StockInRequest;
+import com.example.backend.dto.StockOutRequest;
 import com.example.backend.entity.ProductSku;
-import com.example.backend.entity.StockIn;
-import com.example.backend.entity.StockInDetail;
+import com.example.backend.entity.StockOut;
+import com.example.backend.entity.StockOutDetail;
 import com.example.backend.repository.ProductSkuRepository;
-import com.example.backend.repository.StockInDetailRepository;
-import com.example.backend.repository.StockInRepository;
+import com.example.backend.repository.StockOutDetailRepository;
+import com.example.backend.repository.StockOutRepository;
 
 @RestController
-@RequestMapping("/api/stock-in")
-public class StockInController {
+@RequestMapping("/api/stock-out")
+public class StockOutController {
 
     @Autowired
-    private StockInRepository stockInRepository;
+    private StockOutRepository stockOutRepository;
 
     @Autowired
-    private StockInDetailRepository stockInDetailRepository;
+    private StockOutDetailRepository stockOutDetailRepository;
 
     @Autowired
     private ProductSkuRepository productSkuRepository;
 
     @GetMapping("/tenant/{tenantId}")
-    public ResponseEntity<List<StockIn>> getByTenant(@PathVariable Long tenantId) {
-        return ResponseEntity.ok(stockInRepository.findBytenantId(tenantId));
+    public ResponseEntity<List<StockOut>> getByTenant(@PathVariable Long tenantId) {
+        return ResponseEntity.ok(stockOutRepository.findBytenantId(tenantId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StockIn> getById(@PathVariable Long id) {
-        return stockInRepository.findById(id)
+    public ResponseEntity<StockOut> getById(@PathVariable Long id) {
+        return stockOutRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<StockIn> create(@RequestBody StockInRequest request) {
+    public ResponseEntity<StockOut> create(@RequestBody StockOutRequest request) {
         if (request.tenantId == null) {
             return ResponseEntity.badRequest().build();
         }
-        StockIn stockIn = new StockIn();
-        stockIn.setDescription(request.description);
-        stockIn.setDate(request.date != null ? request.date : LocalDateTime.now());
-        stockIn.setCreatedBy(request.createdBy);
-        stockIn.setTenantId(request.tenantId);
-        stockIn.setRunningNumber(nextRunningNumber(request.tenantId));
-        stockIn.setFinalized(false);
+        StockOut stockOut = new StockOut();
+        stockOut.setDescription(request.description);
+        stockOut.setDate(request.date != null ? request.date : LocalDateTime.now());
+        stockOut.setCreatedBy(request.createdBy);
+        stockOut.setTenantId(request.tenantId);
+        stockOut.setRunningNumber(nextRunningNumber(request.tenantId));
+        stockOut.setFinalized(false);
 
-        StockIn saved = stockInRepository.save(stockIn);
+        StockOut saved = stockOutRepository.save(stockOut);
         return ResponseEntity.ok(saved);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        StockIn existing = stockInRepository.findById(id).orElse(null);
+        StockOut existing = stockOutRepository.findById(id).orElse(null);
         if (existing == null) {
             return ResponseEntity.notFound().build();
         }
         if (existing.isFinalized()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        stockInRepository.deleteById(id);
+        stockOutRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StockIn> update(@PathVariable Long id, @RequestBody StockInRequest request) {
-        StockIn existing = stockInRepository.findById(id).orElse(null);
+    public ResponseEntity<StockOut> update(@PathVariable Long id, @RequestBody StockOutRequest request) {
+        StockOut existing = stockOutRepository.findById(id).orElse(null);
         if (existing == null) {
             return ResponseEntity.notFound().build();
         }
@@ -90,12 +90,12 @@ public class StockInController {
         existing.setDescription(request.description);
         existing.setDate(request.date != null ? request.date : existing.getDate());
         existing.setCreatedBy(request.createdBy != null ? request.createdBy : existing.getCreatedBy());
-        return ResponseEntity.ok(stockInRepository.save(existing));
+        return ResponseEntity.ok(stockOutRepository.save(existing));
     }
 
     @PostMapping("/{id}/finalize")
-    public ResponseEntity<StockIn> finalizeStockIn(@PathVariable Long id) {
-        StockIn existing = stockInRepository.findById(id).orElse(null);
+    public ResponseEntity<StockOut> finalizeStockOut(@PathVariable Long id) {
+        StockOut existing = stockOutRepository.findById(id).orElse(null);
         if (existing == null) {
             return ResponseEntity.notFound().build();
         }
@@ -103,8 +103,8 @@ public class StockInController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        List<StockInDetail> details = stockInDetailRepository.findByStockIn_Id(id);
-        for (StockInDetail detail : details) {
+        List<StockOutDetail> details = stockOutDetailRepository.findByStockOut_Id(id);
+        for (StockOutDetail detail : details) {
             String skuCode = detail.getSku();
             if (skuCode == null || skuCode.isEmpty()) {
                 continue;
@@ -113,18 +113,22 @@ public class StockInController {
             if (sku == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
-            sku.setQuantityAvailable(sku.getQuantityAvailable() + detail.getQuantity());
+            int available = sku.getQuantityAvailable();
+            if (available < detail.getQuantity()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            sku.setQuantityAvailable(available - detail.getQuantity());
             productSkuRepository.save(sku);
         }
 
         existing.setFinalized(true);
-        return ResponseEntity.ok(stockInRepository.save(existing));
+        return ResponseEntity.ok(stockOutRepository.save(existing));
     }
 
     private String nextRunningNumber(Long tenantId) {
-        StockIn last = stockInRepository.findFirstBytenantIdOrderByIdDesc(tenantId);
+        StockOut last = stockOutRepository.findFirstBytenantIdOrderByIdDesc(tenantId);
         if (last == null || last.getRunningNumber() == null || last.getRunningNumber().isEmpty()) {
-            return "SI001";
+            return "SO001";
         }
 
         String raw = last.getRunningNumber().replaceAll("[^0-9]", "");
@@ -136,7 +140,7 @@ public class StockInController {
                 next = 1;
             }
         }
-        return String.format("SI%03d", next);
+        return String.format("SO%03d", next);
     }
 
     @GetMapping("/next-number/tenant/{tenantId}")

@@ -16,8 +16,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "stock_in")
-public class StockIn {
+@Table(name = "stock_out")
+public class StockOut {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,9 +40,9 @@ public class StockIn {
     @Column(nullable = false)
     private boolean finalized = false;
 
-    @OneToMany(mappedBy = "stockIn", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "stockOut", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<StockInDetail> details = new ArrayList<>();
+    private List<StockOutDetail> details = new ArrayList<>();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -65,6 +65,6 @@ public class StockIn {
     public boolean isFinalized() { return finalized; }
     public void setFinalized(boolean finalized) { this.finalized = finalized; }
 
-    public List<StockInDetail> getDetails() { return details; }
-    public void setDetails(List<StockInDetail> details) { this.details = details; }
+    public List<StockOutDetail> getDetails() { return details; }
+    public void setDetails(List<StockOutDetail> details) { this.details = details; }
 }
