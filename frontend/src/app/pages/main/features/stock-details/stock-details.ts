@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { ProductService } from '../../../../services/product';
 import { SessionService } from '../../../../services/session';
 import { Product } from './product.model';
+import { ProductEditor } from './product-editor/product-editor';
 import { Observable, catchError, finalize, map, of } from 'rxjs';
 
 @Component({
   standalone: true,
   selector: 'app-stock-details',
-  imports: [CommonModule],
+  imports: [CommonModule, ProductEditor],
   templateUrl: './stock-details.html',
   styleUrl: './stock-details.scss'
 })
@@ -19,6 +20,8 @@ export class StockDetails implements OnInit {
   loading = false;
   error = '';
   tenantId = 0;
+  editorOpen = false;
+  editorProductId: number | null = null;
 
   constructor(
     private productService: ProductService,
@@ -65,11 +68,22 @@ export class StockDetails implements OnInit {
   }
 
   openAddProduct(): void {
-    this.router.navigate(['/main/stock-details/new']);
+    this.editorProductId = null;
+    this.editorOpen = true;
   }
 
   openEditProduct(product: Product): void {
-    this.router.navigate(['/main/stock-details', product.id]);
+    this.editorProductId = product.id;
+    this.editorOpen = true;
+  }
+
+  closeEditor(): void {
+    this.editorOpen = false;
+    this.editorProductId = null;
+  }
+
+  handleProductSaved(): void {
+    this.loadProducts();
   }
 
   resolveImage(path?: string | null): string {

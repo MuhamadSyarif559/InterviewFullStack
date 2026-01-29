@@ -47,3 +47,15 @@
     </div>
   </div>
 </section>
+
+<div class="editor-modal" *ngIf="editorOpen">
+  <div class="editor-backdrop" (click)="closeEditor()"></div>
+  <div class="editor-dialog">
+    <app-product-editor
+      [dialogMode]="true"
+      [openProductId]="editorProductId"
+      (closed)="closeEditor()"
+      (saved)="handleProductSaved()"
+    ></app-product-editor>
+  </div>
+</div>

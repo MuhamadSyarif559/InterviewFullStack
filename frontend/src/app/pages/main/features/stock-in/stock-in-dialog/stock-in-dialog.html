@@ -1,0 +1,95 @@
+<div class="editor-modal">
+  <div class="editor-backdrop" (click)="close()"></div>
+  <div class="editor-dialog">
+    <section class="panel form-panel">
+      <header class="dialog-header">
+        <div>
+          <p class="eyebrow">New stock in</p>
+          <h3>Create stock in</h3>
+          <p class="sub">Add line items for products and quantities.</p>
+          <p class="meta">Running number: <strong>{{ runningNumber || 'SI001' }}</strong></p>
+        </div>
+        <button class="ghost-btn" type="button" (click)="close()">Close</button>
+      </header>
+
+      <form [formGroup]="stockInForm" (ngSubmit)="saveStockIn()">
+        <div class="field">
+          <label for="stock-date">Date</label>
+          <input id="stock-date" type="date" formControlName="date" />
+        </div>
+        <div class="field">
+          <label for="stock-description">Description</label>
+          <textarea id="stock-description" rows="3" formControlName="description"></textarea>
+        </div>
+
+        <div class="detail-header">
+          <h4>Details</h4>
+          <button class="ghost-btn" type="button" (click)="addDetail()">Add line</button>
+        </div>
+
+        <div class="detail-list" formArrayName="details">
+          <div class="detail-row" *ngFor="let detail of details.controls; let i = index" [formGroupName]="i">
+            <div class="field">
+              <label>Product</label>
+              <div class="search-select">
+                <input
+                  type="text"
+                  formControlName="searchTerm"
+                  placeholder="Search product"
+                  (focus)="setActiveSearch(i)"
+                  (blur)="clearActiveSearch()"
+                />
+                <div class="search-options" *ngIf="activeSearchIndex === i">
+                  <div class="search-empty" *ngIf="productLoading">Loading products...</div>
+                  <button
+                    class="search-option"
+                    type="button"
+                    *ngFor="let product of getFilteredProducts(i)"
+                    (mousedown)="selectProduct(i, product.id); detail.get('searchTerm')?.setValue(product.productName); clearActiveSearch()"
+                  >
+                    {{ product.productName }}
+                  </button>
+                  <div class="search-empty" *ngIf="!productLoading && !getFilteredProducts(i).length">
+                    No products found
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" formControlName="productId" />
+            </div>
+
+            <div class="field">
+              <label>SKU</label>
+              <select formControlName="sku" [disabled]="!getSkusForDetail(i).length || getSkusForDetail(i).length === 1">
+                <option value="">Select SKU</option>
+                <option *ngFor="let sku of getSkusForDetail(i)" [value]="sku.skuCode">
+                  {{ sku.skuCode }}
+                </option>
+              </select>
+              <small *ngIf="getSkusForDetail(i).length === 1" class="hint">Auto-selected</small>
+              <small *ngIf="getSkusForDetail(i).length === 0" class="hint">No SKU found</small>
+            </div>
+
+            <div class="field">
+              <label>Quantity</label>
+              <input type="number" min="1" formControlName="quantity" />
+            </div>
+
+            <button class="ghost-btn danger" type="button" (click)="removeDetail(i)" [disabled]="details.length === 1">
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <div class="state error" *ngIf="productError">{{ productError }}</div>
+        <div class="state error" *ngIf="saveError">{{ saveError }}</div>
+
+        <div class="form-actions">
+          <button class="ghost-btn" type="button" (click)="close()">Cancel</button>
+          <button class="primary-btn" type="submit" [disabled]="saving">
+            {{ saving ? 'Saving...' : 'Save stock in' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>

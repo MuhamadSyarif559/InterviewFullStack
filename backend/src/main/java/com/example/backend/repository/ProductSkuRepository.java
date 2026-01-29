@@ -11,4 +11,6 @@ public interface ProductSkuRepository extends JpaRepository<ProductSku, Long> {
     List<ProductSku> findByTenantID(Long tenantID);
 
     List<ProductSku> findByProduct_Id(Long productId);
+
+    ProductSku findFirstBySkuCodeAndTenantID(String skuCode, Long tenantID);
 }
