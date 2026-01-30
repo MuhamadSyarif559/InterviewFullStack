@@ -7,7 +7,6 @@ import { StockDetails } from './pages/main/features/stock-details/stock-details'
 import { ProductEditor } from './pages/main/features/stock-details/product-editor/product-editor';
 import { StockIn } from './pages/main/features/stock-in/stock-in';
 import { StockOut } from './pages/main/features/stock-out/stock-out';
-import { BranchDetails } from './pages/main/features/branch-details/branch-details';
 import { StockLedger } from './pages/main/features/stock-ledger/stock-ledger';
 
 export const routes: Routes = [
@@ -26,7 +25,6 @@ export const routes: Routes = [
       { path: 'stock-in', component: StockIn },
       { path: 'stock-out', component: StockOut },
       { path: 'stock-ledger', component: StockLedger },
-      { path: 'branch', component: BranchDetails }
     ]
   },
   { path: '**', redirectTo: 'login' },

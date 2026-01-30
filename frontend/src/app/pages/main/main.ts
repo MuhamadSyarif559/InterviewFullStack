@@ -6,7 +6,6 @@ import { EmployeeManagement } from './features/employee-management/employee-mana
 import { StockDetails } from './features/stock-details/stock-details';
 import { StockIn } from './features/stock-in/stock-in';
 import { StockOut } from './features/stock-out/stock-out';
-import { BranchDetails } from './features/branch-details/branch-details';
 import { StockLedger } from './features/stock-ledger/stock-ledger';
 import { SessionService } from '../../services/session';
 
@@ -20,7 +19,6 @@ import { SessionService } from '../../services/session';
     StockDetails,
     StockIn,
     StockOut,
-    BranchDetails,
     StockLedger
   ],
   templateUrl: './main.html',

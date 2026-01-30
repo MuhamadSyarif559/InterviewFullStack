@@ -229,6 +229,9 @@ export class StockInDialog implements OnInit, OnChanges {
             }
           });
         }
+        if (this.stockInId) {
+          this.loadExisting(this.stockInId);
+        }
         this.saved.emit();
       });
   }
@@ -271,9 +274,9 @@ export class StockInDialog implements OnInit, OnChanges {
         catchError(() => of('SI001'))
       )
       .subscribe((num: string) => {
-        this.runningNumber = num ;
-        console.log("tenatid",this.tenantId)
-        console.log("running number",this.runningNumber)
+        this.runningNumber = num;
+        console.log("tenatid", this.tenantId)
+        console.log("running number", this.runningNumber)
       });
   }
 
