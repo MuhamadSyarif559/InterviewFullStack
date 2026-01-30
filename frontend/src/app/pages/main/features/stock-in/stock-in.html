@@ -5,9 +5,17 @@
       <h2>Receive inventory</h2>
       <p class="sub">Create stock-in entries and track incoming quantities.</p>
     </div>
-    <button class="primary-btn" type="button" (click)="openCreate()">
-      New stock in
-    </button>
+    <div class="header-actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search stock in..."
+        (input)="updateSearch($any($event.target).value)"
+      />
+      <button class="primary-btn" type="button" (click)="openCreate()">
+        New stock in
+      </button>
+    </div>
   </header>
 
   <div class="panel list-panel">
@@ -17,7 +25,7 @@
     <div class="state error" *ngIf="!loading && error">{{ error }}</div>
 
     <!-- ✅ ASYNC PIPE UNWRAP -->
-    <ng-container *ngIf="stockIns$ | async as stockIns">
+    <ng-container *ngIf="filteredStockIns$ | async as stockIns">
 
       <div class="empty" *ngIf="!loading && !error && !stockIns.length">
         No stock in records yet.
@@ -73,6 +81,7 @@
   [tenantId]="tenantId"
   [createdBy]="createdBy"
   [stockInId]="editingStockInId"
+  [suggestedRunningNumber]="suggestedRunningNumber"
   (closed)="closeCreate()"
   (saved)="handleSaved()"
 ></app-stock-in-dialog>

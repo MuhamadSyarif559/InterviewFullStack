@@ -5,9 +5,17 @@
       <h2>Issue inventory</h2>
       <p class="sub">Create stock-out entries and track outgoing quantities.</p>
     </div>
-    <button class="primary-btn" type="button" (click)="openCreate()">
-      New stock out
-    </button>
+    <div class="header-actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search stock out..."
+        (input)="updateSearch($any($event.target).value)"
+      />
+      <button class="primary-btn" type="button" (click)="openCreate()">
+        New stock out
+      </button>
+    </div>
   </header>
 
   <div class="panel list-panel">
@@ -16,7 +24,7 @@
     <div class="state" *ngIf="loading">Loading records...</div>
     <div class="state error" *ngIf="!loading && error">{{ error }}</div>
 
-    <ng-container *ngIf="stockOuts$ | async as stockOuts">
+    <ng-container *ngIf="filteredStockOuts$ | async as stockOuts">
 
       <div class="empty" *ngIf="!loading && !error && !stockOuts.length">
         No stock out records yet.
@@ -72,6 +80,7 @@
   [tenantId]="tenantId"
   [createdBy]="createdBy"
   [stockOutId]="editingStockOutId"
+  [suggestedRunningNumber]="suggestedRunningNumber"
   (closed)="closeCreate()"
   (saved)="handleSaved()"
 ></app-stock-out-dialog>

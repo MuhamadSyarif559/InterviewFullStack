@@ -1,0 +1,132 @@
+.stock-ledger {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 18px 45px rgba(20, 20, 43, 0.12);
+}
+
+.stock-ledger__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgba(16, 24, 32, 0.1);
+  padding-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid rgba(16, 24, 32, 0.08);
+  box-shadow: 0 10px 24px rgba(16, 24, 32, 0.08);
+}
+
+.table-wrap {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 32, 0.08);
+  overflow: hidden;
+}
+
+.stock-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.stock-table thead {
+  background: rgba(16, 24, 32, 0.04);
+  text-align: left;
+}
+
+.stock-table th,
+.stock-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(16, 24, 32, 0.08);
+  vertical-align: middle;
+}
+
+.stock-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.stock-table tbody tr:hover {
+  background: rgba(26, 77, 255, 0.05);
+}
+
+.stock-table .mono {
+  font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+  font-weight: 600;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(16, 24, 32, 0.08);
+  color: #101820;
+}
+
+.status.final {
+  background: rgba(201, 42, 42, 0.12);
+  color: #c92a2a;
+}
+
+.state,
+.empty {
+  text-align: center;
+  padding: 16px 0;
+  color: rgba(16, 24, 32, 0.7);
+}
+
+.state.error {
+  color: #c92a2a;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.filter input,
+.filter select {
+  border: 1px solid #d6d8dc;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+@media (max-width: 900px) {
+  .stock-ledger__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

@@ -66,8 +66,16 @@ public class AuthController {
 
     @PutMapping("/users/{id}")public ResponseEntity<?> updateUser(
         @PathVariable Long id,
-        @RequestBody RegisterRequest req
+        @RequestBody RegisterRequest req,
+        HttpSession session
 ) {
+    Long sessionUserId = (Long) session.getAttribute("userId");
+    Integer employmentStatus = (Integer) session.getAttribute("employmentStatus");
+    if (employmentStatus != null && employmentStatus == 1) {
+        if (sessionUserId == null || !sessionUserId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not allowed");
+        }
+    }
     User u = userRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND, "User not found"));
@@ -127,13 +135,14 @@ public class AuthController {
         session.setAttribute("name", existing.get().getName());
         session.setAttribute("companyName", existing.get().getCompanyName());
         session.setAttribute("tenantID", existing.get().getTenantID());
-        // session.setAttribute("EmployeeStatus", existing.get().getEmployementStatus());
+        session.setAttribute("employmentStatus", existing.get().getEmploymentStatus());
         Session response = new Session(
             existing.get().getId(),
             existing.get().getEmail(),
             existing.get().getName(),
             existing.get().getCompanyName(),
-            existing.get().getTenantID()
+            existing.get().getTenantID(),
+            existing.get().getEmploymentStatus()
         );
         return ResponseEntity.ok(response);
     }
@@ -148,7 +157,7 @@ public class AuthController {
         String name = (String) session.getAttribute("name");
         String companyName = (String) session.getAttribute("companyName");
         Long tenantID = (Long) session.getAttribute("tenantID");
-        // Integer employeeStatus = (Integer) session.getAttribute("EmployeeStatus");
+        Integer employmentStatus = (Integer) session.getAttribute("employmentStatus");
 
         Long userId = (Long) session.getAttribute("userId");
         Session response = new Session(
@@ -156,8 +165,8 @@ public class AuthController {
             email,
             name,
             companyName,
-            tenantID != null ? tenantID : 0L
-            // employeeStatus != null ? employeeStatus : 0
+            tenantID != null ? tenantID : 0L,
+            employmentStatus != null ? employmentStatus : 0
         );
 
         return ResponseEntity.ok(response);
@@ -172,8 +181,19 @@ public class AuthController {
     @GetMapping("/employees")
     public ResponseEntity<?> getEmployeesByTenant(HttpSession session) {
         Long tenantID = (Long) session.getAttribute("tenantID");
+        Long userId = (Long) session.getAttribute("userId");
+        Integer employmentStatus = (Integer) session.getAttribute("employmentStatus");
         if (tenantID == null) {
             return ResponseEntity.status(401).body("Not logged in");
+        }
+
+        if (employmentStatus != null && employmentStatus == 1) {
+            if (userId == null) {
+                return ResponseEntity.status(401).body("Not logged in");
+            }
+            return userRepository.findById(userId)
+                .map(user -> ResponseEntity.ok(List.of(user)))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of()));
         }
 
         List<User> employees = userRepository.findBytenantID(tenantID);

@@ -7,6 +7,7 @@ interface MeResponse {
   name: string;
   companyName: string;
   tenantID:number;
+  employmentStatus: number;
 }
 
 @Injectable({ providedIn: 'root' })

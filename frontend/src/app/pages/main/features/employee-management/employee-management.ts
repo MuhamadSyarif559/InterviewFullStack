@@ -7,8 +7,9 @@ import { Employee } from './employee.model';
 import { UserApiResponse, UsersService } from '../../../../services/users';
 import { Auth } from '../../../../services/auth';
 import { ToastService } from '../../../../services/toast';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { SessionService } from '../../../../services/session';
 
 
 @Component({
@@ -20,6 +21,8 @@ import { map, catchError } from 'rxjs/operators';
 })
 export class EmployeeManagement implements OnInit {
   employees$!: Observable<Employee[]>;
+  filteredEmployees$!: Observable<Employee[]>;
+  private searchTerm$ = new BehaviorSubject<string>('');
   loading = false;
   error = '';
   msg = '';
@@ -28,19 +31,32 @@ export class EmployeeManagement implements OnInit {
   formMode: 'add' | 'edit' = 'add';
   formOpen = false;
 
-  constructor(private auth: Auth, private router: Router, private toast: ToastService) { }
+  currentUserId = 0;
+  employmentStatus = 0;
+
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private toast: ToastService,
+    private session: SessionService
+  ) { }
 
   ngOnInit(): void {
+    const session = this.session.value;
+    this.currentUserId = session?.userId ?? 0;
+    this.employmentStatus = session?.employmentStatus ?? 0;
     this.loadUsers();
   }
 
   openAdd(): void {
+    if (this.employmentStatus === 1) return;
     this.formMode = 'add';
     this.selectedEmployee = null;
     this.formOpen = true;
   }
 
   openEdit(employee: Employee): void {
+    if (this.employmentStatus === 1 && employee.id !== this.currentUserId) return;
     this.formMode = 'edit';
     this.selectedEmployee = employee;
     this.formOpen = true;
@@ -117,7 +133,11 @@ export class EmployeeManagement implements OnInit {
     this.employees$ = this.auth.getEmployeesByTenant().pipe(
       map(users => {
         const list = Array.isArray(users) ? users : [];
-        return list.map(user => this.toEmployee(user));
+        const mapped = list.map(user => this.toEmployee(user));
+        if (this.employmentStatus === 1) {
+          return mapped.filter(emp => emp.id === this.currentUserId);
+        }
+        return mapped;
       }),
       catchError(err => {
         this.error = err?.error ?? 'Unable to load employees';
@@ -126,6 +146,10 @@ export class EmployeeManagement implements OnInit {
       finalize(() => {
         this.loading = false;
       })
+    );
+
+    this.filteredEmployees$ = combineLatest([this.employees$, this.searchTerm$]).pipe(
+      map(([employees, term]) => this.filterEmployees(employees, term))
     );
   }
 
@@ -194,5 +218,20 @@ export class EmployeeManagement implements OnInit {
     if (typeof value === 'string') return value.toLowerCase() === 'true';
     if (typeof value === 'number') return value === 1;
     return false;
+  }
+
+  updateSearch(term: string): void {
+    this.searchTerm$.next(term ?? '');
+  }
+
+  private filterEmployees(employees: Employee[], term: string): Employee[] {
+    const query = (term ?? '').toLowerCase().trim();
+    if (!query) return employees;
+    return employees.filter(employee => {
+      const name = (employee.name ?? '').toLowerCase();
+      const email = (employee.email ?? '').toLowerCase();
+      const company = (employee.companyName ?? '').toLowerCase();
+      return name.includes(query) || email.includes(query) || company.includes(query);
+    });
   }
 }

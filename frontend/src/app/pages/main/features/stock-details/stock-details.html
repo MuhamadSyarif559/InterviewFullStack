@@ -5,10 +5,18 @@
       <h2>Products</h2>
       <p class="sub">Select a product to edit details, upload images, and add SKUs.</p>
     </div>
-    <button class="primary-btn" type="button" (click)="openAddProduct()">Add product</button>
+    <div class="header-actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Search products..."
+        (input)="updateSearch($any($event.target).value)"
+      />
+      <button class="primary-btn" type="button" (click)="openAddProduct()">Add product</button>
+    </div>
   </header>
 
-  <div class="product-list__body" *ngIf="products$ | async as products">
+  <div class="product-list__body" *ngIf="filteredProducts$ | async as products">
     <div class="state" *ngIf="loading">Loading products...</div>
     <div class="state error" *ngIf="!loading && error">{{ error }}</div>
 

@@ -7,6 +7,7 @@ export interface SessionData {
   name: string;
   companyName: string;
   tenantID: number;
+  employmentStatus: number;
 }
 
 const STORAGE_KEY = 'sessionData';

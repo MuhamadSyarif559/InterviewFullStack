@@ -7,6 +7,7 @@ import { StockDetails } from './features/stock-details/stock-details';
 import { StockIn } from './features/stock-in/stock-in';
 import { StockOut } from './features/stock-out/stock-out';
 import { BranchDetails } from './features/branch-details/branch-details';
+import { StockLedger } from './features/stock-ledger/stock-ledger';
 import { SessionService } from '../../services/session';
 
 @Component({
@@ -19,7 +20,8 @@ import { SessionService } from '../../services/session';
     StockDetails,
     StockIn,
     StockOut,
-    BranchDetails
+    BranchDetails,
+    StockLedger
   ],
   templateUrl: './main.html',
   styleUrl: './main.scss',
@@ -34,8 +36,7 @@ export class Main implements OnInit {
     { id: 'employee', title: 'Employee management' },
     { id: 'stock-details', title: 'Stock details' },
     { id: 'stock-in', title: 'Stock in' },
-    { id: 'stock-out', title: 'Stock out' },
-    { id: 'branch', title: 'Branch details' }
+    { id: 'stock-out', title: 'Stock out' }
   ] as const;
 
   constructor(

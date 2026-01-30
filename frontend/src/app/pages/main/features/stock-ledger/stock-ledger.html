@@ -1,0 +1,90 @@
+<section class="stock-ledger">
+  <header class="stock-ledger__header">
+    <div>
+      <p class="eyebrow">Stock ledger</p>
+      <h2>Movement history</h2>
+      <p class="sub">Track stock in/out movements and who created them.</p>
+    </div>
+    <div class="header-actions">
+      <button class="primary-btn" type="button" (click)="exportToExcel()">Export to Excel</button>
+    </div>
+  </header>
+
+  <div class="panel list-panel">
+    <h3>Recent movements</h3>
+
+    <div class="filters">
+      <div class="filter">
+        <label>Duration</label>
+        <select (change)="updateDuration($any($event.target).value)">
+          <option value="all">All time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="filter">
+        <label>Start date</label>
+        <input type="date" (change)="updateStartDate($any($event.target).value)" />
+      </div>
+      <div class="filter">
+        <label>End date</label>
+        <input type="date" (change)="updateEndDate($any($event.target).value)" />
+      </div>
+      <div class="filter">
+        <label>Product</label>
+        <input type="search" placeholder="Search product..." (input)="updateProductSearch($any($event.target).value)" />
+      </div>
+      <div class="filter">
+        <label>Created by</label>
+        <select (change)="updateCreatedBy($any($event.target).value)">
+          <option value="all">All</option>
+          <option *ngFor="let creator of creators$ | async" [value]="creator.id">
+            {{ creator.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="state" *ngIf="loading">Loading ledger...</div>
+    <div class="state error" *ngIf="!loading && error">{{ error }}</div>
+
+    <ng-container *ngIf="filteredLedger$ | async as ledger">
+      <div class="empty" *ngIf="!loading && !error && !ledger.length">
+        No ledger entries yet.
+      </div>
+
+      <div class="table-wrap" *ngIf="ledger.length">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Running no</th>
+              <th>Date</th>
+              <th>Product</th>
+              <th>SKU</th>
+              <th>Qty</th>
+              <th>Created by</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of ledger">
+              <td>
+                <span class="status" [class.final]="entry.type === 'OUT'">
+                  {{ entry.type === 'IN' ? 'Stock in' : 'Stock out' }}
+                </span>
+              </td>
+              <td class="mono">{{ entry.runningNumber || '-' }}</td>
+              <td>{{ entry.date | date: 'medium' }}</td>
+              <td>{{ entry.productName }}</td>
+              <td>{{ entry.sku || '-' }}</td>
+              <td>{{ entry.quantity }}</td>
+              <td>{{ entry.createdByName || ('User #' + entry.createdById) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </div>
+</section>

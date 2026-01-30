@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { catchError, filter, finalize, map, of, take } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, finalize, map, of, take, tap } from 'rxjs';
 import { Observable } from 'rxjs';
 import { StockOutDialog } from './stock-out-dialog/stock-out-dialog';
 import { StockOutService, StockOut as StockOutRecord } from '../../../../services/stock-out';
@@ -15,6 +15,8 @@ import { SessionService } from '../../../../services/session';
 })
 export class StockOut implements OnInit {
   stockOuts$!: Observable<StockOutRecord[]>;
+  filteredStockOuts$!: Observable<StockOutRecord[]>;
+  stockOutsSnapshot: StockOutRecord[] = [];
 
   loading = false;
   error = '';
@@ -24,6 +26,8 @@ export class StockOut implements OnInit {
 
   editorOpen = false;
   editingStockOutId: number | null = null;
+  suggestedRunningNumber: string | null = null;
+  private searchTerm$ = new BehaviorSubject<string>('');
 
   constructor(
     private stockOutService: StockOutService,
@@ -64,6 +68,9 @@ export class StockOut implements OnInit {
 
     this.stockOuts$ = this.stockOutService.listByTenant(this.tenantId).pipe(
       map(records => records ?? []),
+      tap(records => {
+        this.stockOutsSnapshot = records ?? [];
+      }),
       catchError(err => {
         this.error = err?.error ?? 'Unable to load stock out records';
         return of([]);
@@ -72,10 +79,15 @@ export class StockOut implements OnInit {
         this.loading = false;
       })
     );
+
+    this.filteredStockOuts$ = combineLatest([this.stockOuts$, this.searchTerm$]).pipe(
+      map(([records, term]) => this.filterStockOuts(records, term))
+    );
   }
 
   openCreate(): void {
     this.editingStockOutId = null;
+    this.suggestedRunningNumber = this.computeNextRunningNumber('SO', this.stockOutsSnapshot);
     this.editorOpen = true;
   }
 
@@ -89,6 +101,7 @@ export class StockOut implements OnInit {
 
   openEdit(record: StockOutRecord): void {
     this.editingStockOutId = record.id;
+    this.suggestedRunningNumber = null;
     this.editorOpen = true;
   }
 
@@ -112,5 +125,36 @@ export class StockOut implements OnInit {
       .subscribe(() => {
         this.loadStockOuts();
       });
+  }
+
+  private computeNextRunningNumber(prefix: string, records: StockOutRecord[]): string {
+    if (!records?.length) {
+      return `${prefix}001`;
+    }
+    let max = 0;
+    for (const record of records) {
+      const raw = (record?.runningNumber ?? '').replace(/[^0-9]/g, '');
+      if (!raw) continue;
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed)) {
+        max = Math.max(max, parsed);
+      }
+    }
+    return `${prefix}${String(max + 1).padStart(3, '0')}`;
+  }
+
+  updateSearch(term: string): void {
+    this.searchTerm$.next(term ?? '');
+  }
+
+  private filterStockOuts(records: StockOutRecord[], term: string): StockOutRecord[] {
+    const query = (term ?? '').toLowerCase().trim();
+    if (!query) return records;
+    return records.filter(record => {
+      const running = (record.runningNumber ?? '').toLowerCase();
+      const desc = (record.description ?? '').toLowerCase();
+      const status = record.finalized ? 'finalized' : 'draft';
+      return running.includes(query) || desc.includes(query) || status.includes(query);
+    });
   }
 }

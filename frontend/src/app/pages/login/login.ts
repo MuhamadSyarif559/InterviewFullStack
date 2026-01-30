@@ -60,7 +60,8 @@ export class Login {
           email: data?.email ?? '',
           name: data?.name ?? '',
           companyName: data?.companyName ?? '',
-          tenantID: data?.tenantID ?? 0
+          tenantID: data?.tenantID ?? 0,
+          employmentStatus: data?.employmentStatus ?? 0
         });
         this.toast.show('Successfully logged in.', 'success');
         this.router.navigateByUrl('/main');

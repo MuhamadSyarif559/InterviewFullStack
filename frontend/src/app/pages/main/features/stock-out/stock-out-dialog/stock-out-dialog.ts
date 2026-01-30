@@ -27,6 +27,7 @@ export class StockOutDialog implements OnInit, OnChanges {
   @Input() tenantId = 0;
   @Input() createdBy = 0;
   @Input() stockOutId: number | null = null;
+  @Input() suggestedRunningNumber: string | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -57,6 +58,9 @@ export class StockOutDialog implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.tenantIdSubject.next(this.tenantId);
+    if (!this.stockOutId && this.suggestedRunningNumber) {
+      this.runningNumber = this.suggestedRunningNumber;
+    }
     this.productsVm$ = this.tenantIdSubject.pipe(
       switchMap((tenantId) => {
         if (!tenantId) {
@@ -81,6 +85,7 @@ export class StockOutDialog implements OnInit, OnChanges {
 
     if (this.stockOutId) {
       this.loadExisting(this.stockOutId);
+      this.loadDetails(this.stockOutId);
     } else {
       this.resetForNew();
     }
@@ -89,10 +94,19 @@ export class StockOutDialog implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tenantId'] && !changes['tenantId'].firstChange) {
       this.tenantIdSubject.next(this.tenantId);
+      if (!this.stockOutId) {
+        this.loadNextNumber();
+      }
+    }
+    if (changes['suggestedRunningNumber'] && !changes['suggestedRunningNumber'].firstChange) {
+      if (!this.stockOutId && this.suggestedRunningNumber) {
+        this.runningNumber = this.suggestedRunningNumber;
+      }
     }
     if (changes['stockOutId'] && !changes['stockOutId'].firstChange) {
       if (this.stockOutId) {
         this.loadExisting(this.stockOutId);
+        this.loadDetails(this.stockOutId);
       } else {
         this.resetForNew();
       }
@@ -218,6 +232,9 @@ export class StockOutDialog implements OnInit, OnChanges {
             }
           });
         }
+        if (this.stockOutId) {
+          this.loadExisting(this.stockOutId);
+        }
         this.saved.emit();
       });
   }
@@ -301,7 +318,7 @@ export class StockOutDialog implements OnInit, OnChanges {
 
   private resetForNew(): void {
     this.isFinalized = false;
-    this.runningNumber = 'SO001';
+    this.runningNumber = this.suggestedRunningNumber || 'SO001';
     this.saveError = '';
     this.stockOutForm.enable({ emitEvent: false });
     this.stockOutForm.reset({

@@ -5,7 +5,7 @@ import { ProductService } from '../../../../services/product';
 import { SessionService } from '../../../../services/session';
 import { Product } from './product.model';
 import { ProductEditor } from './product-editor/product-editor';
-import { Observable, catchError, finalize, map, of } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, combineLatest, finalize, map, of } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -17,11 +17,13 @@ import { Observable, catchError, finalize, map, of } from 'rxjs';
 export class StockDetails implements OnInit {
 
   products$!: Observable<Product[]>;
+  filteredProducts$!: Observable<Product[]>;
   loading = false;
   error = '';
   tenantId = 0;
   editorOpen = false;
   editorProductId: number | null = null;
+  private searchTerm$ = new BehaviorSubject<string>('');
 
   constructor(
     private productService: ProductService,
@@ -52,6 +54,10 @@ export class StockDetails implements OnInit {
       finalize(() => {
         this.loading = false;
       })
+    );
+
+    this.filteredProducts$ = combineLatest([this.products$, this.searchTerm$]).pipe(
+      map(([products, term]) => this.filterProducts(products, term))
     );
   }
 
@@ -92,5 +98,19 @@ export class StockDetails implements OnInit {
       return path;
     }
     return `http://localhost:8080${path}`;
+  }
+
+  updateSearch(term: string): void {
+    this.searchTerm$.next(term ?? '');
+  }
+
+  private filterProducts(products: Product[], term: string): Product[] {
+    const query = (term ?? '').toLowerCase().trim();
+    if (!query) return products;
+    return products.filter(product => {
+      const name = (product.productName ?? '').toLowerCase();
+      const desc = (product.description ?? '').toLowerCase();
+      return name.includes(query) || desc.includes(query);
+    });
   }
 }

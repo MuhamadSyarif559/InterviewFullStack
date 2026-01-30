@@ -27,6 +27,7 @@ export class StockInDialog implements OnInit, OnChanges {
   @Input() tenantId = 0;
   @Input() createdBy = 0;
   @Input() stockInId: number | null = null;
+  @Input() suggestedRunningNumber: string | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
@@ -57,6 +58,9 @@ export class StockInDialog implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.tenantIdSubject.next(this.tenantId);
+    if (!this.stockInId && this.suggestedRunningNumber) {
+      this.runningNumber = this.suggestedRunningNumber;
+    }
     this.productsVm$ = this.tenantIdSubject.pipe(
       switchMap((tenantId) => {
         if (!tenantId) {
@@ -84,12 +88,18 @@ export class StockInDialog implements OnInit, OnChanges {
       this.loadDetails(this.stockInId);
     } else {
       this.resetForNew();
+      this.loadNextNumber();
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['tenantId'] && !changes['tenantId'].firstChange) {
       this.tenantIdSubject.next(this.tenantId);
+    }
+    if (changes['suggestedRunningNumber'] && !changes['suggestedRunningNumber'].firstChange) {
+      if (!this.stockInId && this.suggestedRunningNumber) {
+        this.runningNumber = this.suggestedRunningNumber;
+      }
     }
     if (changes['stockInId'] && !changes['stockInId'].firstChange) {
       if (this.stockInId) {
@@ -261,7 +271,9 @@ export class StockInDialog implements OnInit, OnChanges {
         catchError(() => of('SI001'))
       )
       .subscribe((num: string) => {
-        this.runningNumber = num || 'SI001';
+        this.runningNumber = num ;
+        console.log("tenatid",this.tenantId)
+        console.log("running number",this.runningNumber)
       });
   }
 
@@ -303,7 +315,7 @@ export class StockInDialog implements OnInit, OnChanges {
 
   private resetForNew(): void {
     this.isFinalized = false;
-    this.runningNumber = 'SI001';
+    this.runningNumber = this.suggestedRunningNumber || 'SI001';
     this.saveError = '';
     this.stockInForm.enable({ emitEvent: false });
     this.stockInForm.reset({

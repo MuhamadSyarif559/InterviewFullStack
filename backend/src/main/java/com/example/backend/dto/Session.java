@@ -7,14 +7,16 @@ public class Session {
     private final String name;
     private final String companyName;
     private final Long tenantID;
+    private final Integer employmentStatus;
  
 
-    public Session(Long userId, String email, String name, String companyName, Long tenantID) {
+    public Session(Long userId, String email, String name, String companyName, Long tenantID, Integer employmentStatus) {
         this.userId = userId;
         this.email = email;
         this.name = name;
         this.companyName = companyName;
         this.tenantID = tenantID;
+        this.employmentStatus = employmentStatus;
     }
 
     public Long getUserId() {
@@ -37,5 +39,8 @@ public class Session {
         return tenantID;
     }
 
+    public Integer getEmploymentStatus() {
+        return employmentStatus;
+    }
 
 }

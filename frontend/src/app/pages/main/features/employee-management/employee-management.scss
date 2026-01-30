@@ -31,6 +31,26 @@
   color: #4b5a6b;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-input {
+  border: 1px solid rgba(16, 38, 63, 0.15);
+  border-radius: 999px;
+  padding: 9px 14px;
+  min-width: 220px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: rgba(15, 76, 129, 0.5);
+  box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.15);
+}
+
 .employee-body {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
@@ -144,6 +164,19 @@
 @media (max-width: 960px) {
   .employee-body {
     grid-template-columns: 1fr;
+  }
+
+  .employee-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
   }
 }
 
