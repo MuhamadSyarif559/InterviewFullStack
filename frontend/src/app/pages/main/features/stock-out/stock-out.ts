@@ -5,11 +5,12 @@ import { Observable } from 'rxjs';
 import { StockOutDialog } from './stock-out-dialog/stock-out-dialog';
 import { StockOutService, StockOut as StockOutRecord } from '../../../../services/stock-out';
 import { SessionService } from '../../../../services/session';
+import { ConfirmDialogComponent } from '../../../../components/confirm-dialog/confirm-dialog';
 
 @Component({
   standalone: true,
   selector: 'app-stock-out',
-  imports: [CommonModule, StockOutDialog],
+  imports: [CommonModule, StockOutDialog, ConfirmDialogComponent],
   templateUrl: './stock-out.html',
   styleUrl: './stock-out.scss'
 })
@@ -28,6 +29,11 @@ export class StockOut implements OnInit {
   editingStockOutId: number | null = null;
   suggestedRunningNumber: string | null = null;
   private searchTerm$ = new BehaviorSubject<string>('');
+
+  confirmOpen = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  private pendingDelete: StockOutRecord | null = null;
 
   constructor(
     private stockOutService: StockOutService,
@@ -105,10 +111,22 @@ export class StockOut implements OnInit {
     this.editorOpen = true;
   }
 
-  deleteStockOut(record: StockOutRecord): void {
-    if (!record?.id) return;
-    if (!confirm(`Delete ${record.runningNumber}?`)) return;
+  requestDeleteStockOut(record: StockOutRecord): void {
+    if (!record?.id || record.finalized) return;
+    this.pendingDelete = record;
+    this.confirmTitle = 'Delete stock out record?';
+    this.confirmMessage = `Delete ${record.runningNumber}? This cannot be undone.`;
+    this.confirmOpen = true;
+  }
 
+  confirmDeleteStockOut(): void {
+    const record = this.pendingDelete;
+    if (!record?.id) {
+      this.closeConfirm();
+      return;
+    }
+
+    this.closeConfirm();
     this.loading = true;
     this.error = '';
 
@@ -125,6 +143,15 @@ export class StockOut implements OnInit {
       .subscribe(() => {
         this.loadStockOuts();
       });
+  }
+
+  cancelDeleteStockOut(): void {
+    this.closeConfirm();
+  }
+
+  private closeConfirm(): void {
+    this.confirmOpen = false;
+    this.pendingDelete = null;
   }
 
   private computeNextRunningNumber(prefix: string, records: StockOutRecord[]): string {

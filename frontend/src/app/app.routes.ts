@@ -20,8 +20,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'employee', pathMatch: 'full' },
       { path: 'employee', component: EmployeeManagement },
       { path: 'stock-details', component: StockDetails },
-      { path: 'stock-details/new', component: ProductEditor },
-      { path: 'stock-details/:id', component: ProductEditor },
       { path: 'stock-in', component: StockIn },
       { path: 'stock-out', component: StockOut },
       { path: 'stock-ledger', component: StockLedger },

@@ -15,7 +15,7 @@
         class="ghost-btn danger"
         type="button"
         *ngIf="productMode === 'edit'"
-        (click)="deleteProduct()"
+        (click)="promptDeleteProduct()"
         [disabled]="saving"
       >
         Delete product
@@ -101,13 +101,13 @@
           </div>
 
           <div class="upload-controls">
-            <input 
+            <!-- <input 
               #productImageInput
               type="file"
               accept="image/*"
               (change)="handleImageUpload($event)"
               *ngIf="!imagePreviewUrl"
-            />
+            /> -->
             <p class="hint">PNG or JPG. Uploading saves the file to the server immediately.</p>
 
             <div class="upload-state" *ngIf="imageUploading">
@@ -235,10 +235,10 @@
             />
           </div>
 
-          <div class="field">
+          <!-- <div class="field">
             <label for="sku-image">Image path</label>
             <input id="sku-image" type="text" formControlName="image" readonly />
-          </div>
+          </div> -->
 
           <div class="field image-upload-field">
             <label>SKU image</label>
@@ -287,7 +287,7 @@
               class="ghost-btn danger"
               type="button"
               *ngIf="skuMode === 'edit' && selectedSku"
-              (click)="deleteSku(selectedSku)"
+              (click)="promptDeleteSku(selectedSku)"
             >
               Delete SKU
             </button>
@@ -300,3 +300,15 @@
     </section>
   </div>
 </section>
+
+<app-confirm-dialog
+  *ngIf="confirmOpen"
+  [title]="confirmTitle"
+  [message]="confirmMessage"
+  [confirmText]="confirmConfirmText"
+  [cancelText]="confirmCancelText"
+  [danger]="true"
+  [confirmDisabled]="saving"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()"
+></app-confirm-dialog>

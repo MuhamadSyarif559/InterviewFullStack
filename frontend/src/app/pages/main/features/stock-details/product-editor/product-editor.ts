@@ -6,6 +6,7 @@ import { ProductService } from '../../../../../services/product';
 import { SessionService } from '../../../../../services/session';
 import { ProductSku } from '../product-sku.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ConfirmDialogComponent } from '../../../../../components/confirm-dialog/confirm-dialog';
 import {
   catchError,
   distinctUntilChanged,
@@ -18,7 +19,7 @@ import {
 @Component({
   standalone: true,
   selector: 'app-product-editor',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ConfirmDialogComponent],
   templateUrl: './product-editor.html',
   styleUrl: './product-editor.scss'
 })
@@ -59,6 +60,16 @@ export class ProductEditor implements OnInit {
   skuMode: 'add' | 'edit' = 'add';
   selectedSku: ProductSku | null = null;
   skuError = '';
+
+  confirmOpen = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  confirmConfirmText = 'Delete';
+  confirmCancelText = 'Cancel';
+  private pendingDelete:
+    | { type: 'product' }
+    | { type: 'sku'; sku: ProductSku }
+    | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -236,9 +247,39 @@ export class ProductEditor implements OnInit {
       .subscribe();
   }
 
-  deleteProduct(): void {
+  promptDeleteProduct(): void {
     if (!this.productId) return;
-    if (!confirm('Delete this product? This cannot be undone.')) return;
+    this.pendingDelete = { type: 'product' };
+    this.confirmTitle = 'Delete product?';
+    this.confirmMessage = 'This cannot be undone.';
+    this.confirmOpen = true;
+  }
+
+  confirmDelete(): void {
+    const pending = this.pendingDelete;
+    if (!pending) {
+      this.closeConfirm();
+      return;
+    }
+    this.closeConfirm();
+    if (pending.type === 'product') {
+      this.performDeleteProduct();
+      return;
+    }
+    this.performDeleteSku(pending.sku);
+  }
+
+  cancelDelete(): void {
+    this.closeConfirm();
+  }
+
+  private closeConfirm(): void {
+    this.confirmOpen = false;
+    this.pendingDelete = null;
+  }
+
+  private performDeleteProduct(): void {
+    if (!this.productId) return;
 
     this.saving = true;
     this.saveError = '';
@@ -369,9 +410,16 @@ export class ProductEditor implements OnInit {
       .subscribe();
   }
 
-  deleteSku(sku: ProductSku): void {
+  promptDeleteSku(sku: ProductSku): void {
     if (!sku?.id) return;
-    if (!confirm(`Delete SKU ${sku.skuCode}?`)) return;
+    this.pendingDelete = { type: 'sku', sku };
+    this.confirmTitle = `Delete SKU ${sku.skuCode}?`;
+    this.confirmMessage = 'This cannot be undone.';
+    this.confirmOpen = true;
+  }
+
+  private performDeleteSku(sku: ProductSku): void {
+    if (!sku?.id) return;
 
     this.skuError = '';
     this.productService.deleteSku(sku.id)

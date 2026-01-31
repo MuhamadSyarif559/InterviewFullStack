@@ -61,7 +61,7 @@
                   class="ghost-btn danger"
                   type="button"
                   [disabled]="record.finalized"
-                  (click)="deleteStockOut(record); $event.stopPropagation()"
+                  (click)="requestDeleteStockOut(record); $event.stopPropagation()"
                 >
                   Delete
                 </button>
@@ -84,3 +84,15 @@
   (closed)="closeCreate()"
   (saved)="handleSaved()"
 ></app-stock-out-dialog>
+
+<app-confirm-dialog
+  *ngIf="confirmOpen"
+  [title]="confirmTitle"
+  [message]="confirmMessage"
+  confirmText="Delete"
+  cancelText="Cancel"
+  [danger]="true"
+  [confirmDisabled]="loading"
+  (confirm)="confirmDeleteStockOut()"
+  (cancel)="cancelDeleteStockOut()"
+></app-confirm-dialog>

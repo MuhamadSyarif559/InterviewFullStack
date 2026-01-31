@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, catchError, combineLatest, filter, finalize, map, of, take, tap } from 'rxjs';
 import { StockInDialog } from './stock-in-dialog/stock-in-dialog';
+import { ConfirmDialogComponent } from '../../../../components/confirm-dialog/confirm-dialog';
 import { StockInService, StockIn as StockInRecord } from '../../../../services/stock-in';
 import { SessionService } from '../../../../services/session';
 import { Observable } from 'rxjs';
@@ -9,7 +10,7 @@ import { Observable } from 'rxjs';
 @Component({
   standalone: true,
   selector: 'app-stock-in',
-  imports: [CommonModule, StockInDialog],
+  imports: [CommonModule, StockInDialog, ConfirmDialogComponent],
   templateUrl: './stock-in.html',
   styleUrl: './stock-in.scss'
 })
@@ -28,6 +29,11 @@ export class StockIn implements OnInit {
   editingStockInId: number | null = null;
   suggestedRunningNumber: string | null = null;
   private searchTerm$ = new BehaviorSubject<string>('');
+
+  confirmOpen = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  private pendingDelete: StockInRecord | null = null;
 
   constructor(
     private stockInService: StockInService,
@@ -112,10 +118,22 @@ export class StockIn implements OnInit {
     this.editorOpen = true;
   }
 
-  deleteStockIn(record: StockInRecord): void {
-    if (!record?.id) return;
-    if (!confirm(`Delete ${record.runningNumber}?`)) return;
+  requestDeleteStockIn(record: StockInRecord): void {
+    if (!record?.id || record.finalized) return;
+    this.pendingDelete = record;
+    this.confirmTitle = 'Delete stock in record?';
+    this.confirmMessage = `Delete ${record.runningNumber}? This cannot be undone.`;
+    this.confirmOpen = true;
+  }
 
+  confirmDeleteStockIn(): void {
+    const record = this.pendingDelete;
+    if (!record?.id) {
+      this.closeConfirm();
+      return;
+    }
+
+    this.closeConfirm();
     this.loading = true;
     this.error = '';
 
@@ -132,6 +150,15 @@ export class StockIn implements OnInit {
       .subscribe(() => {
         this.loadStockIns();
       });
+  }
+
+  cancelDeleteStockIn(): void {
+    this.closeConfirm();
+  }
+
+  private closeConfirm(): void {
+    this.confirmOpen = false;
+    this.pendingDelete = null;
   }
 
   private computeNextRunningNumber(prefix: string, records: StockInRecord[]): string {

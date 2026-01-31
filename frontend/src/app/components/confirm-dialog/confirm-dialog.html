@@ -1,0 +1,29 @@
+<div class="confirm-modal">
+  <div class="confirm-backdrop" (click)="handleBackdrop()"></div>
+  <div
+    class="confirm-card"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    [attr.aria-describedby]="messageId"
+  >
+    <header class="confirm-header">
+      <h3 [id]="titleId">{{ title }}</h3>
+    </header>
+    <p class="confirm-message" [id]="messageId">{{ message }}</p>
+    <div class="confirm-actions">
+      <button class="ghost-btn" type="button" (click)="cancel.emit()">
+        {{ cancelText }}
+      </button>
+      <button
+        class="primary-btn"
+        [class.danger]="danger"
+        type="button"
+        [disabled]="confirmDisabled"
+        (click)="confirm.emit()"
+      >
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>
